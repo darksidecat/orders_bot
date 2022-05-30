@@ -1,0 +1,69 @@
+import logging
+from typing import List
+from uuid import uuid4
+
+from pydantic import parse_obj_as
+from sqlalchemy import select
+
+from app.domain.goods import dto
+from app.domain.goods.exceptions.goods import GoodsNotExists
+from app.domain.goods.interfaces.persistence import IGoodsReader, IGoodsRepo
+from app.domain.goods.models.goods import Goods
+from app.infrastructure.database.exception_mapper import exception_mapper
+from app.infrastructure.database.repositories.repo import SQLAlchemyRepo
+
+logger = logging.getLogger(__name__)
+
+
+class GoodsReader(SQLAlchemyRepo, IGoodsReader):
+    @exception_mapper
+    async def all_users(self) -> List[dto.Goods]:
+        query = select(Goods)
+
+        result = await self.session.execute(query)
+        goods = result.scalars().all()
+
+        return parse_obj_as(List[dto.Goods], goods)
+
+    @exception_mapper
+    async def user_by_id(self, goods_id: uuid4) -> dto.Goods:
+        goods = await self.session.get(Goods, goods_id)
+
+        if not goods:
+            raise GoodsNotExists
+
+        return dto.Goods.from_orm(goods)
+
+
+class GoodsRepo(SQLAlchemyRepo, IGoodsRepo):
+    @exception_mapper
+    async def _goods(self, goods_id: uuid4) -> Goods:
+        goods = await self.session.get(Goods, goods_id)
+
+        if not goods:
+            raise GoodsNotExists
+
+        return goods
+
+    @exception_mapper
+    async def add_goods(self, goods: Goods) -> Goods:
+        self.session.add(goods)
+        await self.session.flush()
+
+        return goods
+
+    @exception_mapper
+    async def user_by_id(self, user_id: int) -> Goods:
+        return await self._goods(user_id)
+
+    @exception_mapper
+    async def delete_user(self, goods_id: uuid4) -> None:
+        goods = await self._goods(goods_id)
+        await self.session.delete(goods)
+        await self.session.flush()
+
+    @exception_mapper
+    async def edit_user(self, goods: Goods) -> Goods:
+        await self.session.flush()
+
+        return goods

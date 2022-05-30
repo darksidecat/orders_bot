@@ -1,0 +1,31 @@
+[tool.poetry]
+name = "orders_bot"
+version = "0.1.0"
+description = ""
+authors = ["darksidecat <bitalik371@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+aiogram = {version = "^3.0.0b3", allow-prereleases = true}
+aiogram_dialog = {git = "https://github.com/Tishka17/aiogram_dialog.git", branch = "feature/aiogram3"}
+SQLAlchemy = "^1.4.36"
+aioredis = "^2.0.1"
+alembic = "^1.7.7"
+asyncpg = "^0.25.0"
+attrs = "^21.4.0"
+pydantic = "^1.9.1"
+redis = "^4.3.1"
+python-dotenv = "^0.20.0"
+
+
+[tool.poetry.dev-dependencies]
+pytest-asyncio = "^0.18.3"
+mypy = "^0.950"
+sqlalchemy2-stubs = "^0.0.2-alpha.22"
+black = "^22.3.0"
+isort = "^5.10.1"
+pytest = "^7.1.2"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

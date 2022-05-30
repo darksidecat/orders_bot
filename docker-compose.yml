@@ -1,0 +1,58 @@
+version: '3.8'
+services:
+    redis:
+        image: redis:6-alpine
+        restart: "unless-stopped"
+        environment:
+            REDIS_HOST: ${REDIS__HOST}
+            VOLUMES_DIR: ${VOLUMES_DIR}
+        volumes:
+            - "~/${VOLUMES_DIR}/redis-config:/usr/local/etc/redis"
+            - "~/${VOLUMES_DIR}/redis-data:/data"
+        ports:
+            - "16379:6379"
+        command: "redis-server /usr/local/etc/redis/redis.conf"
+    db:
+        image: postgres:14-alpine
+        restart: "unless-stopped"
+        environment:
+            POSTGRES_USER: ${DB__USER}
+            POSTGRES_PASSWORD: ${DB__PASSWORD}
+            POSTGRES_DB: ${DB__NAME}
+            VOLUMES_DIR: ${VOLUMES_DIR}
+        volumes:
+            - "~/${VOLUMES_DIR}/pg-data:/var/lib/postgresql/data"
+        ports:
+            - "15432:5432"
+    db_migration:
+        build:
+            context: ..
+            dockerfile: ../app/tgbot/Dockerfile
+        restart: "on-failure"
+        depends_on:
+            - db
+        env_file: .env
+        command: ["/wait-for-it/wait-for-it.sh", "db:5432", "-t", "2", "--", "python", "-m", "alembic", "upgrade", "head"]
+    bot:
+        build:
+            context: ..
+            dockerfile: ../app/tgbot/Dockerfile
+        stop_signal: SIGINT
+        restart: "unless-stopped"
+        env_file: .env
+        depends_on:
+            - db
+            - db_migration
+            - redis
+    api:
+        build:
+            context: ..
+            dockerfile: ../app/api/Dockerfile
+        stop_signal: SIGINT
+        restart: "unless-stopped"
+        env_file: .env
+        depends_on:
+            - db
+            - db_migration
+        ports:
+            - "8000:80"
