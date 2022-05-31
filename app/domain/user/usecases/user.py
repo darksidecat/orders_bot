@@ -5,7 +5,7 @@ from typing import List
 from app.domain.access_levels.models.helper import id_to_access_levels
 from app.domain.common.events.dispatcher import EventDispatcher
 from app.domain.common.exceptions.base import AccessDenied
-from app.domain.common.exceptions.repo import UniqueViolationError
+from app.domain.common.exceptions.repo import IntegrityViolationError
 from app.domain.user import dto
 from app.domain.user.access_policy import UserAccessPolicy
 from app.domain.user.exceptions.user import UserAlreadyExists
@@ -70,7 +70,7 @@ class AddUser(UserUseCase):
 
             logger.info("User persisted: id=%s, %s", user.id, user)
 
-        except UniqueViolationError:
+        except IntegrityViolationError:
             await self.uow.rollback()
             raise UserAlreadyExists
 
@@ -122,7 +122,7 @@ class PatchUser(UserUseCase):
         try:
             updated_user = await self.uow.user.edit_user(user=user)
             await self.uow.commit()
-        except UniqueViolationError:
+        except IntegrityViolationError:
             await self.uow.rollback()
             raise UserAlreadyExists
 
@@ -143,13 +143,13 @@ class UserService:
         self.event_dispatcher = event_dispatcher
 
     async def get_users(self) -> List[dto.User]:
-        if not self.access_policy.read_user_policy():
+        if not self.access_policy.read_users():
             raise AccessDenied()
         return await GetUsers(uow=self.uow, event_dispatcher=self.event_dispatcher)()
 
     async def get_user(self, user_id: int) -> dto.User:
         if not (
-            self.access_policy.read_user_policy()
+            self.access_policy.read_users()
             or self.access_policy.read_user_self(user_id)
         ):
             raise AccessDenied()

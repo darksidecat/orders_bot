@@ -33,7 +33,7 @@ dev-alembic:
 .PHONY: dev-bot
 dev-bot:
 	$(call setup_env, ./deployment/.env.dev)
-	python -m app.tgbot --init_admin_db
+	python -m app.tgbot
 
 .PHONY: prod
 prod:

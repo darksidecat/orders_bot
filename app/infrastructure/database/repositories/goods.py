@@ -1,6 +1,6 @@
 import logging
-from typing import List
-from uuid import uuid4
+from typing import List, Optional
+from uuid import UUID
 
 from pydantic import parse_obj_as
 from sqlalchemy import select
@@ -17,8 +17,12 @@ logger = logging.getLogger(__name__)
 
 class GoodsReader(SQLAlchemyRepo, IGoodsReader):
     @exception_mapper
-    async def all_users(self) -> List[dto.Goods]:
-        query = select(Goods)
+    async def goods_in_folder(self, parent_id: Optional[UUID]) -> List[dto.Goods]:
+        query = (
+            select(Goods)
+            .where(Goods.parent_id == parent_id)
+            .order_by(Goods.type.desc(), Goods.name)
+        )
 
         result = await self.session.execute(query)
         goods = result.scalars().all()
@@ -26,7 +30,7 @@ class GoodsReader(SQLAlchemyRepo, IGoodsReader):
         return parse_obj_as(List[dto.Goods], goods)
 
     @exception_mapper
-    async def user_by_id(self, goods_id: uuid4) -> dto.Goods:
+    async def goods_by_id(self, goods_id: UUID) -> dto.Goods:
         goods = await self.session.get(Goods, goods_id)
 
         if not goods:
@@ -37,7 +41,7 @@ class GoodsReader(SQLAlchemyRepo, IGoodsReader):
 
 class GoodsRepo(SQLAlchemyRepo, IGoodsRepo):
     @exception_mapper
-    async def _goods(self, goods_id: uuid4) -> Goods:
+    async def _goods(self, goods_id: UUID) -> Goods:
         goods = await self.session.get(Goods, goods_id)
 
         if not goods:
@@ -53,17 +57,17 @@ class GoodsRepo(SQLAlchemyRepo, IGoodsRepo):
         return goods
 
     @exception_mapper
-    async def user_by_id(self, user_id: int) -> Goods:
+    async def goods_by_id(self, user_id: UUID) -> Goods:
         return await self._goods(user_id)
 
     @exception_mapper
-    async def delete_user(self, goods_id: uuid4) -> None:
+    async def delete_goods(self, goods_id: UUID) -> None:
         goods = await self._goods(goods_id)
         await self.session.delete(goods)
         await self.session.flush()
 
     @exception_mapper
-    async def edit_user(self, goods: Goods) -> Goods:
+    async def edit_goods(self, goods: Goods) -> Goods:
         await self.session.flush()
 
         return goods

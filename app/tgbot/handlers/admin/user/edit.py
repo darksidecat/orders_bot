@@ -58,7 +58,9 @@ async def save_user_id(
     await query.answer()
 
 
-async def get_old_user(dialog_manager: DialogManager, user_service: UserService, **kwargs):
+async def get_old_user(
+    dialog_manager: DialogManager, user_service: UserService, **kwargs
+):
     user_id = dialog_manager.current_context().dialog_data[OLD_USER_ID]
     try:
         user = await user_service.get_user(int(user_id))
@@ -104,7 +106,10 @@ async def on_field_selected(
 
 
 async def get_user_edit_data(
-    dialog_manager: DialogManager, user_service: UserService, access_levels_service: AccessLevelsService, **kwargs
+    dialog_manager: DialogManager,
+    user_service: UserService,
+    access_levels_service: AccessLevelsService,
+    **kwargs,
 ):
     user_id = dialog_manager.current_context().dialog_data[OLD_USER_ID]
 
@@ -132,7 +137,10 @@ async def process_result(start_data: Data, result: Any, dialog_manager: DialogMa
 
 
 async def get_access_levels(
-    dialog_manager: DialogManager, access_levels_service: AccessLevelsService, user_service: UserService, **kwargs
+    dialog_manager: DialogManager,
+    access_levels_service: AccessLevelsService,
+    user_service: UserService,
+    **kwargs,
 ):
 
     user_id = dialog_manager.current_context().dialog_data[OLD_USER_ID]
@@ -140,7 +148,9 @@ async def get_access_levels(
 
     init_check = dialog_manager.current_context().dialog_data.get("init_check")
     if init_check is None:
-        user_access_levels = await access_levels_service.get_user_access_levels(int(user_id))
+        user_access_levels = await access_levels_service.get_user_access_levels(
+            int(user_id)
+        )
         checked = dialog_manager.current_context().widget_data.setdefault(
             ACCESS_LEVELS, []
         )
@@ -255,7 +265,7 @@ edit_user_dialog = Dialog(
             ),
             id="user_scrolling",
             width=1,
-            height=5,
+            height=8,
         ),
         Cancel(),
         getter=get_users,

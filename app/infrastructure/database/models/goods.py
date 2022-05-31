@@ -15,7 +15,12 @@ goods_table = Table(
     Column("id", UUID(as_uuid=True), primary_key=True),
     Column("name", TEXT, nullable=False),
     Column("type", SQLEnum(GoodsType), nullable=False),
-    Column("parent_id", UUID(as_uuid=True), ForeignKey("goods.id", ondelete="CASCADE", onupdate="CASCADE"), nullable=True),
+    Column(
+        "parent_id",
+        UUID(as_uuid=True),
+        ForeignKey("goods.id", ondelete="RESTRICT", onupdate="CASCADE"),
+        nullable=True,
+    ),
     Column("sku", TEXT, nullable=True),
     Column("is_active", BOOLEAN, nullable=False, default=True),
 )
@@ -27,8 +32,15 @@ mapper_registry.map_imperatively(
         "parent": relationship(
             Goods,
             remote_side=[goods_table.c.id],
+            passive_deletes="all",
             back_populates="childrens",
-            lazy="selectin"),
-        "childrens": relationship(Goods)
+            lazy="selectin",
+        ),
+        "childrens": relationship(
+            Goods,
+            remote_side=[goods_table.c.parent_id],
+            lazy="selectin",
+            passive_deletes="all",
+        ),
     },
 )

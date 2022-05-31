@@ -12,6 +12,6 @@ def exception_mapper(func: Callable[..., Any]) -> Callable[..., Any]:
         try:
             return await func(*args, **kwargs)
         except IntegrityError as err:
-            raise repo.UniqueViolationError from err
+            raise repo.IntegrityViolationError from err
 
     return wrapped

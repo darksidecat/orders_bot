@@ -19,8 +19,14 @@ class Services(BaseMiddleware):
         uow = data.get("uow")
         access_policy = data.get("access_policy")
 
-        data["user_service"] = UserService(uow=uow, access_policy=access_policy, event_dispatcher=event_dispatcher)
-        data["access_levels_service"] = AccessLevelsService(uow=uow, access_policy=access_policy, event_dispatcher=event_dispatcher)
-        data["goods_service"] = GoodsService(uow=uow, access_policy=access_policy, event_dispatcher=event_dispatcher)
+        data["user_service"] = UserService(
+            uow=uow, access_policy=access_policy, event_dispatcher=event_dispatcher
+        )
+        data["access_levels_service"] = AccessLevelsService(
+            uow=uow, access_policy=access_policy, event_dispatcher=event_dispatcher
+        )
+        data["goods_service"] = GoodsService(
+            uow=uow, access_policy=access_policy, event_dispatcher=event_dispatcher
+        )
 
         return await handler(event, data)

@@ -32,9 +32,9 @@ class Settings(BaseSettings):
     redis: Redis
 
     class Config:
-        env_file = '.env'
-        env_file_encoding = 'utf-8'
-        env_nested_delimiter = '__'
+        env_file = ".env"
+        env_file_encoding = "utf-8"
+        env_nested_delimiter = "__"
 
 
 def load_config() -> Settings:

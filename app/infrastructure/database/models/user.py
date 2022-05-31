@@ -78,4 +78,3 @@ helper.Levels = UpdatedLevels
 
 def map_tables():
     pass
-

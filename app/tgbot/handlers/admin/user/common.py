@@ -32,10 +32,10 @@ async def save_user_id(
     await query.answer()
 
 
-async def get_user(dialog_manager: DialogManager,  user_service: UserService, **kwargs):
+async def get_user(dialog_manager: DialogManager, user_service: UserService, **kwargs):
     user_id = dialog_manager.current_context().dialog_data[USER_ID]
     try:
-        user = await  user_service.get_user(int(user_id))
+        user = await user_service.get_user(int(user_id))
     except UserNotExists:  # ToDo check if need
         user = None
     return {USER: user}
@@ -46,14 +46,14 @@ user_adding_process = Multi(
     Format(f"<pre>User id:       ...</pre>", when=when_not(USER_ID)),
     Format(f"<pre>User name:     {{{USER_NAME}}}</pre>", when=USER_NAME),
     Format(f"<pre>User name:     ...</pre>", when=when_not(USER_NAME)),
-    Format(
-        f"<pre>Access levels: {{{ACCESS_LEVELS}}}</pre>\n", when=ACCESS_LEVELS
-    ),
+    Format(f"<pre>Access levels: {{{ACCESS_LEVELS}}}</pre>\n", when=ACCESS_LEVELS),
     Format(f"<pre>Access levels: ...</pre>\n", when=when_not(ACCESS_LEVELS)),
 )
 
 
-async def get_user_data(dialog_manager: DialogManager, access_levels_service: AccessLevelsService, **kwargs):
+async def get_user_data(
+    dialog_manager: DialogManager, access_levels_service: AccessLevelsService, **kwargs
+):
     dialog_data = dialog_manager.current_context().dialog_data
 
     levels = []

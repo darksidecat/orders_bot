@@ -13,18 +13,37 @@ from app.domain.goods.dto.goods import GoodsCreate
 from app.domain.goods.models.goods_type import GoodsType
 from app.domain.goods.usecases.goods import GoodsService
 from app.tgbot import states
-from app.tgbot.constants import GOODS_NAME, GOODS_SKU, GOODS_TYPE, NO, YES_NO
+from app.tgbot.constants import (
+    GOODS_NAME,
+    GOODS_SKU,
+    GOODS_TYPE,
+    NO,
+    SELECTED_GOODS,
+    YES_NO,
+)
 from app.tgbot.handlers.admin.goods.common import get_goods_data, goods_adding_process
+from app.tgbot.handlers.admin.user.common import copy_start_data_to_context
 from app.tgbot.handlers.dialogs.common import enable_send_mode
 from app.tgbot.states.goods_db import AddGoods
 
 
-async def request_goods_name(message: Message, dialog: ManagedDialogAdapterProto, manager: DialogManager, **kwargs):
+async def request_goods_name(
+    message: Message,
+    dialog: ManagedDialogAdapterProto,
+    manager: DialogManager,
+    **kwargs,
+):
     manager.current_context().dialog_data[GOODS_NAME] = message.text
     await dialog.next()
 
 
-async def save_goods_type(query: CallbackQuery, select: ManagedWidgetAdapter[Select], manager: DialogManager, item_id: str, **kwargs):
+async def save_goods_type(
+    query: CallbackQuery,
+    select: ManagedWidgetAdapter[Select],
+    manager: DialogManager,
+    item_id: str,
+    **kwargs,
+):
     manager.current_context().dialog_data[GOODS_TYPE] = item_id
     if item_id == GoodsType.FOLDER.value:
         await manager.dialog().switch_to(AddGoods.confirm)
@@ -32,12 +51,23 @@ async def save_goods_type(query: CallbackQuery, select: ManagedWidgetAdapter[Sel
         await manager.dialog().next()
 
 
-async def request_goods_sku(message: Message, dialog: ManagedDialogAdapterProto, manager: DialogManager, **kwargs):
+async def request_goods_sku(
+    message: Message,
+    dialog: ManagedDialogAdapterProto,
+    manager: DialogManager,
+    **kwargs,
+):
     manager.current_context().dialog_data[GOODS_SKU] = message.text
     await dialog.next()
 
 
-async def add_goods_yes_no(query: CallbackQuery, select: ManagedWidgetAdapter[Select], manager: DialogManager, item_id: str, **kwargs):
+async def add_goods_yes_no(
+    query: CallbackQuery,
+    select: ManagedWidgetAdapter[Select],
+    manager: DialogManager,
+    item_id: str,
+    **kwargs,
+):
     goods_service: GoodsService = manager.data.get("goods_service")
     data = manager.current_context().dialog_data
 
@@ -49,7 +79,7 @@ async def add_goods_yes_no(query: CallbackQuery, select: ManagedWidgetAdapter[Se
     goods = GoodsCreate(
         name=data[GOODS_NAME],
         type=GoodsType(data[GOODS_TYPE]),
-        parent_id=data.get("from_parent_id"),
+        parent_id=data.get(SELECTED_GOODS),
         sku=data.get(GOODS_SKU),
     )
 
@@ -72,7 +102,12 @@ async def result_getter(dialog_manager: DialogManager, **kwargs):
     return {"result": dialog_manager.current_context().dialog_data.get("result")}
 
 
-async def back_from_confirm(query: CallbackQuery, button: ManagedWidgetAdapter[Button], manager: DialogManager, **kwargs):
+async def back_from_confirm(
+    query: CallbackQuery,
+    button: ManagedWidgetAdapter[Button],
+    manager: DialogManager,
+    **kwargs,
+):
     if manager.current_context().dialog_data.get(GOODS_SKU):
         await manager.dialog().back()
     else:
@@ -96,7 +131,10 @@ add_goods_dialog = Dialog(
             Format("{item[0]}"),
             id="goods_type",
             item_id_getter=itemgetter(1),
-            items=[("📁 Folder", GoodsType.FOLDER.value), ("Goods", GoodsType.GOODS.value)],
+            items=[
+                ("📁 Folder", GoodsType.FOLDER.value),
+                ("Goods", GoodsType.GOODS.value),
+            ],
             on_click=save_goods_type,
         ),
         Row(Back(), Cancel(), Next(when=GOODS_TYPE)),
@@ -108,7 +146,7 @@ add_goods_dialog = Dialog(
         goods_adding_process,
         Const("Input SKU:"),
         MessageInput(request_goods_sku),
-        Row(Back(), Cancel(), Next(when=GOODS_NAME)),
+        Row(Back(), Cancel(), Next(when=GOODS_SKU)),
         getter=get_goods_data,
         state=states.goods_db.AddGoods.sku,
         parse_mode="HTML",
@@ -127,7 +165,6 @@ add_goods_dialog = Dialog(
         getter=get_goods_data,
         state=states.goods_db.AddGoods.confirm,
         parse_mode="HTML",
-        preview_add_transitions=[Next()],
     ),
     Window(
         Format("{result}"),
@@ -136,4 +173,5 @@ add_goods_dialog = Dialog(
         state=states.goods_db.AddGoods.result,
         parse_mode="HTML",
     ),
+    on_start=copy_start_data_to_context,
 )

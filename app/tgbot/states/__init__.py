@@ -1,1 +1,1 @@
-from . import admin_menu, user_db
+from . import admin_menu, goods_db, user_db

@@ -24,7 +24,9 @@ class UserDB(BaseMiddleware):
 
             uow: IUserUoW = data["uow"]
             try:
-                user = await GetUser(uow=uow, event_dispatcher=event_dispatcher)(int(from_user_id))
+                user = await GetUser(uow=uow, event_dispatcher=event_dispatcher)(
+                    int(from_user_id)
+                )
             except UserNotExists:
                 user = None
 

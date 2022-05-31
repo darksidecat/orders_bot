@@ -5,5 +5,5 @@ class RepositoryError(AppException):
     """Base repository error"""
 
 
-class UniqueViolationError(RepositoryError):
-    """Violation of unique constraint"""
+class IntegrityViolationError(RepositoryError):
+    """Violation of constraint"""

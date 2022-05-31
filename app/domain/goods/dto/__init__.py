@@ -1,1 +1,1 @@
-from .goods import Goods, GoodsCreate
+from .goods import Goods, GoodsCreate, GoodsPatch

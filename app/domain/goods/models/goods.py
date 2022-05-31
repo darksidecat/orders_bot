@@ -16,13 +16,24 @@ from app.domain.goods.models.goods_type import GoodsType
 class Goods(Aggregate):
     id: UUID = attrs.field(validator=validators.instance_of(UUID), factory=uuid.uuid4)
     name: str = attrs.field(validator=validators.instance_of(str))
-    type: Optional[GoodsType] = attrs.field(validator=validators.instance_of(Optional[GoodsType]))
-    parent_id: Optional[UUID] = attrs.field(validator=validators.instance_of(Optional[UUID]), default=0)
+    type: Optional[GoodsType] = attrs.field(
+        validator=validators.instance_of(Optional[GoodsType])
+    )
+    parent_id: Optional[UUID] = attrs.field(
+        validator=validators.instance_of(Optional[UUID]), default=0
+    )
     sku: Optional[str] = attrs.field(validator=validators.instance_of(Optional[str]))
     is_active: bool = attrs.field(validator=validators.instance_of(bool), default=True)
 
     @classmethod
-    def create(cls, name: str, type: GoodsType, parent_id: Optional[UUID] = None, sku: str = None, is_active: bool = True):
+    def create(
+        cls,
+        name: str,
+        type: GoodsType,
+        parent_id: Optional[UUID] = None,
+        sku: str = None,
+        is_active: bool = True,
+    ):
         goods = Goods(
             name=name,
             type=type,
