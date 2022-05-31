@@ -1,6 +1,6 @@
 from typing import List
 
-from attrs import Factory, field
+import attrs
 
 from app.domain.common.events.event import Event
 from app.domain.common.models.entity import entity
@@ -8,4 +8,13 @@ from app.domain.common.models.entity import entity
 
 @entity
 class Aggregate:
-    events: List[Event] = field(default=Factory(list))
+    _events: List[Event] = attrs.field(factory=list)
+
+    @property
+    def events(self):
+        # there is strange bug with attrs and sqlalchemy
+        # after loading from db, aggregate._events is not present as attribute,
+        # so we need to create it manually
+        if not hasattr(self, "_events"):
+            self._events = []
+        return self._events

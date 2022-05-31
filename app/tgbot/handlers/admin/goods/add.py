@@ -111,6 +111,7 @@ async def back_from_confirm(
     if manager.current_context().dialog_data.get(GOODS_SKU):
         await manager.dialog().back()
     else:
+        await query.answer()
         await manager.dialog().switch_to(AddGoods.type)
 
 
