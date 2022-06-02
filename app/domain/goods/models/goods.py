@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import uuid
 from typing import Optional
 from uuid import UUID
@@ -33,7 +35,7 @@ class Goods(Aggregate):
         parent_id: Optional[UUID] = None,
         sku: str = None,
         is_active: bool = True,
-    ):
+    ) -> Goods:
         goods = Goods(
             name=name,
             type=type,

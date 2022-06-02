@@ -6,28 +6,21 @@ from aiogram.types import CallbackQuery, Message
 from aiogram_dialog import Dialog, DialogManager, Window
 from aiogram_dialog.manager.protocols import ManagedDialogAdapterProto
 from aiogram_dialog.widgets.input import MessageInput
-from aiogram_dialog.widgets.kbd import (
-    Back,
-    Button,
-    Cancel,
-    Row,
-    ScrollingGroup,
-    Select,
-    Start,
-)
+from aiogram_dialog.widgets.kbd import Back, Button, Cancel, Row, ScrollingGroup, Select
 from aiogram_dialog.widgets.managed import ManagedWidgetAdapter
 from aiogram_dialog.widgets.text import Const, Format
 
 from app.domain.goods.dto import Goods, GoodsPatch
 from app.domain.goods.exceptions.goods import (
     CantDeleteWithChildren,
+    CantMakeActiveWithInactiveParent,
     CantMakeInactiveWithActiveChildren,
     GoodsNotExists,
 )
 from app.domain.goods.models.goods_type import GoodsType
 from app.domain.goods.usecases.goods import GoodsService
 from app.tgbot import states
-from app.tgbot.constants import GOODS, OLD_GOODS_ID, SELECTED_GOODS
+from app.tgbot.constants import GOODS, SELECTED_GOODS, SELECTOR_GOODS_ID
 from app.tgbot.handlers.admin.user.common import copy_start_data_to_context
 
 ROOT_GOODS = Goods(
@@ -43,7 +36,6 @@ async def go_to_next_level(
 ):
     goods_service: GoodsService = manager.data.get("goods_service")
 
-    manager.current_context().dialog_data[OLD_GOODS_ID] = item_id
     manager.current_context().dialog_data[SELECTED_GOODS] = item_id
     if (await goods_service.get_goods_by_id(UUID(item_id))).type == GoodsType.GOODS:
         await manager.dialog().next()
@@ -81,7 +73,10 @@ Parent ID: {current_goods.parent_id}
         if current_goods
         else ""
     )
-    return {"current_goods_data": data}
+    goods_data = {"current_goods_data": data}
+    if current_goods and current_goods.type == GoodsType.GOODS:
+        goods_data["is_not_folder"] = True
+    return goods_data
 
 
 async def selected_goods_data(dialog_manager: DialogManager, **kwargs):
@@ -102,7 +97,7 @@ async def add_new_goods(
 async def edit_this_folder(
     query: CallbackQuery, button: Button, manager: DialogManager, **kwargs
 ):
-    await manager.switch_to(states.goods_db.EditGoods.select_field)
+    await manager.switch_to(states.goods_db.EditGoods.select_action)
 
 
 async def change_active_status(
@@ -116,6 +111,8 @@ async def change_active_status(
         await goods_service.change_goods_status(parent_id_as_uuid)
     except CantMakeInactiveWithActiveChildren:
         await query.answer("Can't make inactive with active children")
+    except CantMakeActiveWithInactiveParent:
+        await query.answer("Can't make active with inactive parent")
     await manager.dialog().back()
 
 
@@ -211,7 +208,7 @@ edit_goods_dialog = Dialog(
         ScrollingGroup(
             Select(
                 Format("{item.icon} {item.name} {item.sku_text} {item.active_icon}"),
-                id=OLD_GOODS_ID,
+                id=SELECTOR_GOODS_ID,
                 item_id_getter=attrgetter("id"),
                 items=GOODS,
                 on_click=go_to_next_level,
@@ -243,7 +240,12 @@ edit_goods_dialog = Dialog(
             Button(
                 Const("Edit name"), on_click=edit_field_dialog_start, id="edit_name"
             ),
-            Button(Const("Edit sku"), on_click=edit_field_dialog_start, id="edit_sku"),
+            Button(
+                Const("Edit sku"),
+                on_click=edit_field_dialog_start,
+                id="edit_sku",
+                when="is_not_folder",
+            ),
         ),
         Row(
             Button(
@@ -258,6 +260,6 @@ edit_goods_dialog = Dialog(
             Cancel(),
         ),
         getter=get_current_goods,
-        state=states.goods_db.EditGoods.select_field,
+        state=states.goods_db.EditGoods.select_action,
     ),
 )

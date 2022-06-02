@@ -19,3 +19,11 @@ class CantMakeInactiveWithActiveChildren(GoodsException):
 
 class CantDeleteWithChildren(GoodsException):
     """Can't delete with children"""
+
+
+class CantSetFolderSKU(GoodsException):
+    """Can't set folder SKU"""
+
+
+class CantMakeActiveWithInactiveParent(GoodsException):
+    """Can't make active with inactive parent"""

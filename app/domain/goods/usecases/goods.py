@@ -12,10 +12,13 @@ from app.domain.common.exceptions.repo import IntegrityViolationError
 from app.domain.goods import dto
 from app.domain.goods.exceptions.goods import (
     CantDeleteWithChildren,
+    CantMakeActiveWithInactiveParent,
     CantMakeInactiveWithActiveChildren,
+    CantSetFolderSKU,
 )
 from app.domain.goods.interfaces.uow import IGoodsUoW
 from app.domain.goods.models.goods import Goods
+from app.domain.goods.models.goods_type import GoodsType
 from app.domain.user.access_policy import UserAccessPolicy
 
 logger = logging.getLogger(__name__)
@@ -79,6 +82,11 @@ class ChangeGoodsStatus(GoodsUseCase):
             if True in children_statuses:
                 raise CantMakeInactiveWithActiveChildren()
 
+        else:
+            parent = await self.uow.goods_reader.goods_by_id(goods.parent_id)
+            if parent.is_active is False:
+                raise CantMakeActiveWithInactiveParent()
+
         await self.uow.commit()
         return dto.Goods.from_orm(goods)
 
@@ -93,7 +101,7 @@ class DeleteGoods(GoodsUseCase):
         await self.uow.commit()
 
 
-class GoodsPatch(GoodsUseCase):
+class PatchGoods(GoodsUseCase):
     async def __call__(self, patch_goods_data: dto.GoodsPatch) -> dto.Goods:
         goods = await self.uow.goods.goods_by_id(patch_goods_data.id)
 
@@ -102,8 +110,10 @@ class GoodsPatch(GoodsUseCase):
         if patch_goods_data.parent_id is not UNSET:
             goods.parent_id = patch_goods_data.parent_id
         if patch_goods_data.sku is not UNSET:
+            if goods.type == GoodsType.FOLDER:
+                raise CantSetFolderSKU()
             goods.sku = patch_goods_data.sku
-
+        await self.uow.goods.edit_goods(goods=goods)
         await self.uow.commit()
         return dto.Goods.from_orm(goods)
 
@@ -157,6 +167,6 @@ class GoodsService:
     async def patch_goods(self, patch_goods_data: dto.GoodsPatch) -> dto.Goods:
         if not self.access_policy.modify_goods():
             raise AccessDenied()
-        return await GoodsPatch(uow=self.uow, event_dispatcher=self.event_dispatcher)(
+        return await PatchGoods(uow=self.uow, event_dispatcher=self.event_dispatcher)(
             patch_goods_data=patch_goods_data
         )

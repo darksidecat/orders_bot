@@ -1,4 +1,4 @@
-from sqlalchemy import BIGINT, BOOLEAN, TEXT, Column
+from sqlalchemy import BOOLEAN, TEXT, Column
 from sqlalchemy import Enum as SQLEnum
 from sqlalchemy import ForeignKey, Table
 from sqlalchemy.dialects.postgresql import UUID
@@ -25,22 +25,24 @@ goods_table = Table(
     Column("is_active", BOOLEAN, nullable=False, default=True),
 )
 
-mapper_registry.map_imperatively(
-    Goods,
-    goods_table,
-    properties={
-        "parent": relationship(
-            Goods,
-            remote_side=[goods_table.c.id],
-            passive_deletes="all",
-            back_populates="childrens",
-            lazy="selectin",
-        ),
-        "childrens": relationship(
-            Goods,
-            remote_side=[goods_table.c.parent_id],
-            lazy="selectin",
-            passive_deletes="all",
-        ),
-    },
-)
+
+def map_goods():
+    mapper_registry.map_imperatively(
+        Goods,
+        goods_table,
+        properties={
+            "parent": relationship(
+                Goods,
+                remote_side=[goods_table.c.id],
+                passive_deletes="all",
+                back_populates="childrens",
+                lazy="selectin",
+            ),
+            "childrens": relationship(
+                Goods,
+                remote_side=[goods_table.c.parent_id],
+                lazy="selectin",
+                passive_deletes="all",
+            ),
+        },
+    )

@@ -7,6 +7,8 @@ from app.domain.access_levels.interfaces.uow import IAccessLevelUoW
 from app.domain.common.interfaces.uow import IUoW
 from app.domain.goods.interfaces.persistence import IGoodsReader, IGoodsRepo
 from app.domain.goods.interfaces.uow import IGoodsUoW
+from app.domain.market.interfaces.persistence import IMarketReader, IMarketRepo
+from app.domain.market.interfaces.uow import IMarketUoW
 from app.domain.user.interfaces.persistence import IUserReader, IUserRepo
 from app.domain.user.interfaces.uow import IUserUoW
 from app.infrastructure.database.exception_mapper import exception_mapper
@@ -24,12 +26,16 @@ class SQLAlchemyBaseUoW(IUoW):
         await self._session.rollback()
 
 
-class SQLAlchemyUoW(SQLAlchemyBaseUoW, IUserUoW, IAccessLevelUoW, IGoodsUoW):
+class SQLAlchemyUoW(
+    SQLAlchemyBaseUoW, IUserUoW, IAccessLevelUoW, IGoodsUoW, IMarketUoW
+):
     user: IUserRepo
     user_reader = IUserReader
     access_level_reader: IAccessLevelReader
     goods: IGoodsRepo
     goods_reader: IGoodsReader
+    market: IMarketRepo
+    market_reader: IMarketReader
 
     def __init__(
         self,
@@ -39,10 +45,14 @@ class SQLAlchemyUoW(SQLAlchemyBaseUoW, IUserUoW, IAccessLevelUoW, IGoodsUoW):
         access_level_reader: Type[IAccessLevelReader],
         goods_repo: Type[IGoodsRepo],
         goods_reader: Type[IGoodsReader],
+        market_repo: Type[IMarketRepo],
+        market_reader: Type[IMarketReader],
     ):
         self.user = user_repo(session)
         self.user_reader = user_reader(session)
         self.access_level_reader = access_level_reader(session)
         self.goods = goods_repo(session)
         self.goods_reader = goods_reader(session)
+        self.market = market_repo(session)
+        self.market_reader = market_reader(session)
         super().__init__(session)

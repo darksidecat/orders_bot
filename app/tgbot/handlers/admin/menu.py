@@ -12,6 +12,9 @@ admin_menu_dialog = Dialog(
         Const("Select category"),
         Start(Const("User"), id="user_menu", state=admin_menu.UserCategory.action),
         Start(Const("Goods"), id="goods_menu", state=admin_menu.GoodsCategory.action),
+        Start(
+            Const("Market"), id="market_menu", state=admin_menu.MarketCategory.action
+        ),
         state=admin_menu.AdminMenu.category,
     ),
 )

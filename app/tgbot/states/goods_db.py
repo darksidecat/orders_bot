@@ -9,15 +9,9 @@ class AddGoods(StatesGroup):
     result = State()
 
 
-class DeleteGoods(StatesGroup):
-    select_goods = State()
-    confirm = State()
-    result = State()
-
-
 class EditGoods(StatesGroup):
     select_goods = State()
-    select_field = State()
+    select_action = State()
     result = State()
 
 

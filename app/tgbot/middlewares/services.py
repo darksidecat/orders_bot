@@ -5,6 +5,7 @@ from aiogram.types import Update
 
 from app.domain.access_levels.usecases.access_levels import AccessLevelsService
 from app.domain.goods.usecases.goods import GoodsService
+from app.domain.market.usecases.market import MarketService
 from app.domain.user.usecases.user import UserService
 
 
@@ -26,6 +27,9 @@ class Services(BaseMiddleware):
             uow=uow, access_policy=access_policy, event_dispatcher=event_dispatcher
         )
         data["goods_service"] = GoodsService(
+            uow=uow, access_policy=access_policy, event_dispatcher=event_dispatcher
+        )
+        data["market_service"] = MarketService(
             uow=uow, access_policy=access_policy, event_dispatcher=event_dispatcher
         )
 

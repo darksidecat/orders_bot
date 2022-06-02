@@ -5,7 +5,7 @@ from sqlalchemy import engine_from_config, pool
 
 from app.config import load_config
 from app.infrastructure.database.db import make_connection_string
-from app.infrastructure.database.models import mapper_registry
+from app.infrastructure.database.models import map_tables, mapper_registry
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -26,6 +26,7 @@ if config.config_file_name is not None:
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
 target_metadata = mapper_registry.metadata
+map_tables()
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:

@@ -9,6 +9,7 @@ from aiogram_dialog import DialogRegistry
 from app.config import load_config
 from app.domain.common.events.dispatcher import EventDispatcher
 from app.infrastructure.database.db import sa_sessionmaker
+from app.infrastructure.database.models import map_tables
 from app.tgbot.handlers import register_handlers
 from app.tgbot.middlewares import setup_middlewares
 from app.tgbot.services.set_commands import set_commands
@@ -52,8 +53,11 @@ async def main():
 
     register_handlers(dp=dp, admin_router=admin_router, dialog_registry=dialog_registry)
 
+    map_tables()
+
     try:
         await set_commands(bot, config)
+        await bot.get_updates(offset=-1)
         await dp.start_polling(bot, config=config, event_dispatcher=event_dispatcher)
     finally:
         await dp.fsm.storage.close()

@@ -6,6 +6,7 @@ from sqlalchemy.orm import sessionmaker
 
 from app.infrastructure.database.repositories import AccessLevelReader, UserRepo
 from app.infrastructure.database.repositories.goods import GoodsReader, GoodsRepo
+from app.infrastructure.database.repositories.market import MarketReader, MarketRepo
 from app.infrastructure.database.repositories.user import UserReader
 from app.infrastructure.database.uow import SQLAlchemyUoW
 
@@ -30,6 +31,8 @@ class Database(BaseMiddleware):
                 user_reader=UserReader,
                 goods_repo=GoodsRepo,
                 goods_reader=GoodsReader,
+                market_repo=MarketRepo,
+                market_reader=MarketReader,
             )
 
             return await handler(event, data)

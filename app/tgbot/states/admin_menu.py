@@ -11,3 +11,7 @@ class UserCategory(StatesGroup):
 
 class GoodsCategory(StatesGroup):
     action = State()
+
+
+class MarketCategory(StatesGroup):
+    action = State()

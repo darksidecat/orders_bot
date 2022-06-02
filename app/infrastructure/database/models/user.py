@@ -42,30 +42,6 @@ user_table = Table(
     Column("name", TEXT, nullable=False),
 )
 
-mapper_registry.map_imperatively(
-    TelegramUser,
-    user_table,
-    properties={
-        "access_levels": relationship(
-            AccessLevel,
-            secondary=user_access_levels,
-            back_populates="users",
-            lazy="selectin",
-        )
-    },
-)
-mapper_registry.map_imperatively(
-    AccessLevel,
-    access_level_table,
-    properties={
-        "users": relationship(
-            TelegramUser,
-            secondary=user_access_levels,
-            back_populates="access_levels",
-        )
-    },
-)
-
 
 class UpdatedLevels(Enum):  # ToDo
     BLOCKED = AccessLevel(id=-1, name=LevelName.BLOCKED)
@@ -73,8 +49,29 @@ class UpdatedLevels(Enum):  # ToDo
     USER = AccessLevel(id=2, name=LevelName.USER)
 
 
-helper.Levels = UpdatedLevels
+def map_user():
+    mapper_registry.map_imperatively(
+        TelegramUser,
+        user_table,
+        properties={
+            "access_levels": relationship(
+                AccessLevel,
+                secondary=user_access_levels,
+                back_populates="users",
+                lazy="selectin",
+            )
+        },
+    )
+    mapper_registry.map_imperatively(
+        AccessLevel,
+        access_level_table,
+        properties={
+            "users": relationship(
+                TelegramUser,
+                secondary=user_access_levels,
+                back_populates="access_levels",
+            )
+        },
+    )
 
-
-def map_tables():
-    pass
+    helper.Levels = UpdatedLevels

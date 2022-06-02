@@ -22,5 +22,8 @@ class UserAccessPolicy:
     read_goods = read_users
     modify_goods = modify_user
 
+    read_markets = read_users
+    modify_markets = modify_user
+
     def read_user_self(self, user_id: int):
         return self.user.id == user_id

@@ -85,19 +85,18 @@ async def request_name(
     await manager.done({USER_NAME: message.text})
 
 
-COLUMN_STATES = {
-    TelegramUser.id.name: states.user_db.EditUserId.request,
-    TelegramUser.name.name: states.user_db.EditUserName.request,
-    TelegramUser.access_levels.key: states.user_db.EditAccessLevel.request,
-}
-
-
 async def on_field_selected(
     query: CallbackQuery,
     select: ManagedWidgetAdapter[Select],
     manager: DialogManager,
     item_id: str,
 ):
+    COLUMN_STATES = {
+        TelegramUser.id.name: states.user_db.EditUserId.request,
+        TelegramUser.name.name: states.user_db.EditUserName.request,
+        TelegramUser.access_levels.key: states.user_db.EditAccessLevel.request,
+    }
+
     await manager.start(
         state=COLUMN_STATES[item_id],
         data=manager.current_context().dialog_data.copy(),
