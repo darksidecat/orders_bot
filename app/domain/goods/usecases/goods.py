@@ -63,7 +63,7 @@ class GetGoodsInFolder(GoodsUseCase):
         return parse_obj_as(List[dto.Goods], goods)
 
 
-class GetGoodsById(GoodsUseCase):
+class GetGoods(GoodsUseCase):
     async def __call__(self, goods_id: Optional[UUID]) -> dto.Goods:
         goods = await self.uow.goods_reader.goods_by_id(goods_id)
         return dto.Goods.from_orm(goods)
@@ -139,7 +139,7 @@ class GoodsService:
     async def get_goods_by_id(self, goods_id: UUID) -> dto.Goods:
         if not self.access_policy.read_goods():
             raise AccessDenied()
-        return await GetGoodsById(uow=self.uow, event_dispatcher=self.event_dispatcher)(
+        return await GetGoods(uow=self.uow, event_dispatcher=self.event_dispatcher)(
             goods_id=goods_id
         )
 

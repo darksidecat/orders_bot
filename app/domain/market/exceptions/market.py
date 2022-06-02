@@ -7,3 +7,7 @@ class MarketException(AppException):
 
 class MarketNotExists(MarketException):
     """Market not exist"""
+
+
+class CantDeleteWithOrders(MarketException):
+    """Can't delete market with orders"""

@@ -8,7 +8,7 @@ class AddMarket(StatesGroup):
 
 
 class EditMarket(StatesGroup):
-    select_goods = State()
+    select_market = State()
     select_action = State()
     result = State()
 

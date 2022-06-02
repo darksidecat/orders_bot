@@ -11,7 +11,7 @@ market_menu_dialog = Dialog(
         Start(
             Const("Add/Edit"),
             id="edit_market",
-            state=EditMarket.select_goods,
+            state=EditMarket.select_market,
             mode=StartMode.NORMAL,
         ),
         Cancel(),
