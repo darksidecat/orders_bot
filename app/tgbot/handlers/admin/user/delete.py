@@ -6,6 +6,7 @@ from aiogram_dialog.widgets.kbd import Back, Cancel, Next, Row, ScrollingGroup, 
 from aiogram_dialog.widgets.managed import ManagedWidgetAdapter
 from aiogram_dialog.widgets.text import Const, Format
 
+from app.domain.user.exceptions.user import CantDeleteWithOrders
 from app.domain.user.usecases.user import UserService
 from app.tgbot import states
 from app.tgbot.constants import NO, USER_ID, USERS, YES_NO
@@ -23,11 +24,15 @@ async def delete_user_yes_no(
     data = manager.current_context().dialog_data
 
     if item_id == NO:
-        data["result"] = "User deleting cancelled"
-        await manager.dialog().next()
+        await query.answer("User deleting cancelled", show_alert=True)
+        await manager.dialog().back()
         return
-
-    await user_service.delete_user(int(data[USER_ID]))
+    try:
+        await user_service.delete_user(int(data[USER_ID]))
+    except CantDeleteWithOrders:
+        await query.answer("User can't be deleted because he has orders", show_alert=True)
+        await manager.dialog().back()
+        return
     data["result"] = f"User {data[USER_ID]} deleted"
     await manager.dialog().next()
 

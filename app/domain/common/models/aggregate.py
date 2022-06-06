@@ -8,7 +8,7 @@ from app.domain.common.models.entity import entity
 
 @entity
 class Aggregate:
-    _events: List[Event] = attrs.field(factory=list)
+    _events: List[Event] = attrs.field(factory=list, repr=False)
 
     @property
     def events(self):

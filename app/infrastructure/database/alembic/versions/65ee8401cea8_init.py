@@ -11,7 +11,7 @@ from alembic import op
 # revision identifiers, used by Alembic.
 from sqlalchemy import orm
 
-from app.infrastructure.database.models.user import UpdatedLevels, access_level_table
+from app.domain.access_levels.models.access_level import AccessLevel, LevelName
 
 revision = "65ee8401cea8"
 down_revision = None
@@ -55,11 +55,16 @@ def upgrade():
 
     bind = op.get_bind()
     session = orm.Session(bind=bind)
+
+    blocked = AccessLevel(id=-1, name=LevelName.BLOCKED)
+    admin = AccessLevel(id=1, name=LevelName.ADMINISTRATOR)
+    user = AccessLevel(id=2, name=LevelName.USER)
+
     session.add_all(
         (
-            UpdatedLevels.BLOCKED.value,
-            UpdatedLevels.USER.value,
-            UpdatedLevels.ADMINISTRATOR.value,
+            blocked,
+            admin,
+            user,
         )
     )
     session.commit()

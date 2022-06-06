@@ -1,4 +1,4 @@
-from sqlalchemy import BOOLEAN, TEXT, Column
+from sqlalchemy import BOOLEAN, TEXT, Column, func
 from sqlalchemy import Enum as SQLEnum
 from sqlalchemy import ForeignKey, Table
 from sqlalchemy.dialects.postgresql import UUID
@@ -12,7 +12,7 @@ from .base import mapper_registry
 goods_table = Table(
     "goods",
     mapper_registry.metadata,
-    Column("id", UUID(as_uuid=True), primary_key=True),
+    Column("id", UUID(as_uuid=True), primary_key=True, server_default=func.uuid_generate_v4()),
     Column("name", TEXT, nullable=False),
     Column("type", SQLEnum(GoodsType), nullable=False),
     Column(

@@ -8,7 +8,7 @@ from app.domain.common.exceptions.base import AccessDenied
 from app.domain.common.exceptions.repo import IntegrityViolationError
 from app.domain.user import dto
 from app.domain.user.access_policy import UserAccessPolicy
-from app.domain.user.exceptions.user import UserAlreadyExists
+from app.domain.user.exceptions.user import UserAlreadyExists, CantDeleteWithOrders
 from app.domain.user.interfaces.uow import IUserUoW
 from app.domain.user.models.user import TelegramUser
 
@@ -89,8 +89,12 @@ class DeleteUser(UserUseCase):
 
 
         """
-        await self.uow.user.delete_user(user_id)
-        await self.uow.commit()
+        try:
+            await self.uow.user.delete_user(user_id)
+            await self.uow.commit()
+        except IntegrityViolationError:
+            await self.uow.rollback()
+            raise CantDeleteWithOrders()
 
         logger.info("User deleted: id=%s,", user_id)
 

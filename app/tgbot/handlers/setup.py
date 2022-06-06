@@ -12,4 +12,4 @@ def register_handlers(
 
     register_admin_handlers(admin_router, dialog_registry)
     register_chief_handlers(dp)
-    register_user_handlers(dp)
+    register_user_handlers(dp, dialog_registry)

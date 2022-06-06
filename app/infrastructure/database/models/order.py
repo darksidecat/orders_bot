@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from sqlalchemy import BIGINT, INT, TEXT, Column, DateTime, ForeignKey, Table
+from sqlalchemy import BIGINT, INT, TEXT, Column, DateTime, ForeignKey, Table, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
@@ -16,7 +16,7 @@ from .base import mapper_registry
 order_line_table = Table(
     "order_line",
     mapper_registry.metadata,
-    Column("id", UUID(as_uuid=True), primary_key=True),
+    Column("id", UUID(as_uuid=True), primary_key=True, server_default=func.uuid_generate_v4()),
     Column(
         "order_id",
         UUID(as_uuid=True),
@@ -35,7 +35,7 @@ order_line_table = Table(
 order_table = Table(
     "order",
     mapper_registry.metadata,
-    Column("id", UUID(as_uuid=True), primary_key=True),
+    Column("id", UUID(as_uuid=True), primary_key=True, server_default=func.uuid_generate_v4()),
     Column(
         "creator_id",
         INT,
@@ -60,8 +60,7 @@ def map_order():
         properties={
             "goods": relationship(
                 Goods,
-                # back_populates="order_lines",
-                lazy="selectin",
+                lazy="joined",
                 uselist=False,
                 backref="order_lines",
             ),
@@ -74,20 +73,22 @@ def map_order():
         properties={
             "creator": relationship(
                 TelegramUser,
-                backref="orders",
-                lazy="selectin",
+                back_populates="orders",
+                lazy="joined",
                 uselist=False,
+                passive_deletes="all",
             ),
             "recipient_market": relationship(
                 Market,
-                backref="orders",
-                lazy="selectin",
+                back_populates="orders",
+                lazy="joined",
                 uselist=False,
+                passive_deletes="all",
             ),
             "order_lines": relationship(
                 OrderLine,
                 backref="order",
-                lazy="selectin",
+                lazy="joined",
             ),
         },
     )

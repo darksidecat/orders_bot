@@ -65,6 +65,7 @@ class DeleteMarket(MarketUseCase):
             await self.uow.market.delete_market(market_id)
             await self.uow.commit()
         except IntegrityViolationError:
+            await self.uow.rollback()
             raise CantDeleteWithOrders()
 
 
