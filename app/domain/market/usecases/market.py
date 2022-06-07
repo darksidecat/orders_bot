@@ -22,8 +22,8 @@ class MarketUseCase(ABC):
 
 
 class GetAllMarkets(MarketUseCase):
-    async def __call__(self) -> List[dto.Market]:
-        markets = await self.uow.market_reader.all_markets()
+    async def __call__(self, only_active: bool) -> List[dto.Market]:
+        markets = await self.uow.market_reader.all_markets(only_active=only_active)
         return [dto.Market.from_orm(market) for market in markets]
 
 
@@ -80,10 +80,12 @@ class MarketService:
         self.access_policy = access_policy
         self.event_dispatcher = event_dispatcher
 
-    async def get_all_markets(self) -> List[dto.Market]:
+    async def get_all_markets(self, only_active: bool) -> List[dto.Market]:
         if not self.access_policy.read_markets():
             raise AccessDenied()
-        return await GetAllMarkets(self.uow, self.event_dispatcher)()
+        return await GetAllMarkets(self.uow, self.event_dispatcher)(
+            only_active=only_active
+        )
 
     async def get_market_by_id(self, market_id: UUID):
         if not self.access_policy.read_markets():

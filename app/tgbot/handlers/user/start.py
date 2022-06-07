@@ -1,16 +1,15 @@
 from aiogram import Dispatcher
-from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.dispatcher.fsm.state import any_state
 from aiogram.types import Message
-from aiogram.utils.text_decorations import html_decoration as fmt
 from aiogram_dialog import DialogManager, StartMode
 
-from app.infrastructure.database.models import TelegramUser
 from app.tgbot.states import main_menu
 
 
 async def user_start(m: Message, dialog_manager: DialogManager):
-    await dialog_manager.start(state=main_menu.MainMenu.select_option, mode=StartMode.RESET_STACK)
+    await dialog_manager.start(
+        state=main_menu.MainMenu.select_option, mode=StartMode.RESET_STACK
+    )
 
 
 def register_start(dp: Dispatcher):

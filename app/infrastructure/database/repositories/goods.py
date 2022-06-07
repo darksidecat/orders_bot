@@ -17,12 +17,17 @@ logger = logging.getLogger(__name__)
 
 class GoodsReader(SQLAlchemyRepo, IGoodsReader):
     @exception_mapper
-    async def goods_in_folder(self, parent_id: Optional[UUID]) -> List[dto.Goods]:
+    async def goods_in_folder(
+        self, parent_id: Optional[UUID], only_active: bool
+    ) -> List[dto.Goods]:
         query = (
             select(Goods)
             .where(Goods.parent_id == parent_id)
             .order_by(Goods.type.desc(), Goods.name)
         )
+
+        if only_active:
+            query = query.where(Goods.is_active.is_(True))
 
         result = await self.session.execute(query)
         goods = result.scalars().all()

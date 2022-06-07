@@ -1,6 +1,7 @@
 import uuid
 from datetime import datetime
-from typing import List
+from enum import Enum, unique
+from typing import List, Optional
 from uuid import UUID
 
 import attrs
@@ -9,10 +10,17 @@ from attrs import validators
 from app.domain.common.events.event import Event
 from app.domain.common.models.aggregate import Aggregate
 from app.domain.common.models.entity import entity
-from app.domain.order import dto
 from app.domain.goods.models.goods import Goods
 from app.domain.market.models.market import Market
+from app.domain.order import dto
 from app.domain.user.models.user import TelegramUser
+
+
+@unique
+class ConfirmedStatus(Enum):
+    YES = "YES"
+    NO = "NO"
+    NOT_PROCESSED = "NOT_PROCESSED"
 
 
 @entity
@@ -20,6 +28,13 @@ class OrderLine:
     id: UUID = attrs.field(validator=validators.instance_of(UUID), factory=uuid.uuid4)
     goods: Goods = attrs.field(validator=validators.instance_of(Goods))
     quantity: int = attrs.field(validator=validators.instance_of(int))
+
+
+@entity
+class OrderMessage:
+    id: UUID = attrs.field(validator=validators.instance_of(UUID), factory=uuid.uuid4)
+    message_id: int = attrs.field(validator=validators.instance_of(int))
+    chat_id: int = attrs.field(validator=validators.instance_of(int))
 
 
 @entity
@@ -32,6 +47,11 @@ class Order(Aggregate):
     )
     recipient_market: Market = attrs.field(validator=validators.instance_of(Market))
     commentary: str = attrs.field(validator=validators.instance_of(str))
+    confirmed: ConfirmedStatus = attrs.field(
+        validator=validators.instance_of(ConfirmedStatus),
+        default=ConfirmedStatus.NOT_PROCESSED,
+    )
+    order_messages: List[OrderMessage] = attrs.field(factory=list)
 
     def create(self):
         self.events.append(OrderCreated(dto.order.Order.from_orm(self)))

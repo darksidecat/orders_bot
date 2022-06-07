@@ -8,7 +8,6 @@ from app.domain.order.interfaces.uow import IOrderUoW
 from app.domain.order.models.order import Order
 from app.domain.user.access_policy import UserAccessPolicy
 
-
 logger = logging.getLogger(__name__)
 
 

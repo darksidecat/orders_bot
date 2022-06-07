@@ -7,7 +7,7 @@ from sqlalchemy.orm import sessionmaker
 from app.infrastructure.database.repositories import AccessLevelReader, UserRepo
 from app.infrastructure.database.repositories.goods import GoodsReader, GoodsRepo
 from app.infrastructure.database.repositories.market import MarketReader, MarketRepo
-from app.infrastructure.database.repositories.order import OrderRepo, OrderReader
+from app.infrastructure.database.repositories.order import OrderReader, OrderRepo
 from app.infrastructure.database.repositories.user import UserReader
 from app.infrastructure.database.uow import SQLAlchemyUoW
 

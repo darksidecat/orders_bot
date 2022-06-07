@@ -6,7 +6,9 @@ from app.domain.goods.models.goods import Goods
 
 
 class IGoodsReader(Protocol):
-    async def goods_in_folder(self, parent_id: Optional[UUID]) -> List[GoodsDTO]:
+    async def goods_in_folder(
+        self, parent_id: Optional[UUID], only_active: bool
+    ) -> List[GoodsDTO]:
         ...
 
     async def get_parent_folder(self, child_id: UUID) -> Optional[GoodsDTO]:

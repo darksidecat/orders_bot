@@ -36,7 +36,7 @@ async def add_new_market(
 async def get_markets(
     dialog_manager: DialogManager, market_service: MarketService, **kwargs
 ):
-    markets = await market_service.get_all_markets()
+    markets = await market_service.get_all_markets(only_active=True)
     return {MARKET: markets}
 
 

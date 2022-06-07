@@ -58,8 +58,12 @@ class AddGoods(GoodsUseCase):
 
 
 class GetGoodsInFolder(GoodsUseCase):
-    async def __call__(self, parent_id: Optional[UUID]) -> list[dto.Goods]:
-        goods = await self.uow.goods_reader.goods_in_folder(parent_id=parent_id)
+    async def __call__(
+        self, parent_id: Optional[UUID], only_active: bool
+    ) -> list[dto.Goods]:
+        goods = await self.uow.goods_reader.goods_in_folder(
+            parent_id=parent_id, only_active=only_active
+        )
         return parse_obj_as(List[dto.Goods], goods)
 
 
@@ -143,12 +147,14 @@ class GoodsService:
             goods_id=goods_id
         )
 
-    async def get_goods_in_folder(self, parent_id: Optional[UUID]) -> list[dto.Goods]:
+    async def get_goods_in_folder(
+        self, parent_id: Optional[UUID], only_active: bool
+    ) -> list[dto.Goods]:
         if not self.access_policy.read_goods():
             raise AccessDenied()
         return await GetGoodsInFolder(
             uow=self.uow, event_dispatcher=self.event_dispatcher
-        )(parent_id=parent_id)
+        )(parent_id=parent_id, only_active=only_active)
 
     async def change_goods_status(self, goods_id: UUID) -> dto.Goods:
         if not self.access_policy.modify_goods():

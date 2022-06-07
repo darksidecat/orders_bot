@@ -23,4 +23,3 @@ class BlockedUserWithOtherRole(UserException):
 
 class CantDeleteWithOrders(UserException):
     """Can't delete user with orders"""
-

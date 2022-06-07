@@ -9,7 +9,7 @@ class IMarketReader(Protocol):
     async def market_by_id(self, market_id: UUID) -> MarketDTO:
         ...
 
-    async def all_markets(self) -> List[MarketDTO]:
+    async def all_markets(self, only_active: bool) -> List[MarketDTO]:
         ...
 
 

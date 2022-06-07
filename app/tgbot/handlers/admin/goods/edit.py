@@ -47,7 +47,9 @@ async def get_goods(
 ):
     parent_id = dialog_manager.current_context().dialog_data.get(SELECTED_GOODS)
     parent_id_as_uuid = UUID(str(parent_id)) if parent_id else None
-    goods = await goods_service.get_goods_in_folder(parent_id_as_uuid)
+    goods = await goods_service.get_goods_in_folder(
+        parent_id_as_uuid, only_active=False
+    )
     return {GOODS: goods}
 
 

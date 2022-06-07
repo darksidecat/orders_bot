@@ -30,7 +30,9 @@ async def delete_user_yes_no(
     try:
         await user_service.delete_user(int(data[USER_ID]))
     except CantDeleteWithOrders:
-        await query.answer("User can't be deleted because he has orders", show_alert=True)
+        await query.answer(
+            "User can't be deleted because he has orders", show_alert=True
+        )
         await manager.dialog().back()
         return
     data["result"] = f"User {data[USER_ID]} deleted"

@@ -8,6 +8,7 @@ class LevelName(Enum):
     BLOCKED = "BLOCKED"
     USER = "USER"
     ADMINISTRATOR = "ADMINISTRATOR"
+    CONFIRMATION = "CONFIRMATION"
 
 
 @value_object

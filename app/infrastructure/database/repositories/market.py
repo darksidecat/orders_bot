@@ -17,8 +17,11 @@ logger = logging.getLogger(__name__)
 
 class MarketReader(SQLAlchemyRepo, IMarketReader):
     @exception_mapper
-    async def all_markets(self) -> List[dto.Market]:
+    async def all_markets(self, only_active: bool) -> List[dto.Market]:
         query = select(Market).order_by(Market.name)
+
+        if only_active:
+            query = query.where(Market.is_active.is_(True))
 
         result = await self.session.execute(query)
         goods = result.scalars().all()

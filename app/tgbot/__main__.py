@@ -1,7 +1,7 @@
 import asyncio
 import logging
 
-from aiogram import Bot, Dispatcher, Router
+from aiogram import Bot, Dispatcher
 from aiogram.dispatcher.fsm.storage.memory import MemoryStorage, SimpleEventIsolation
 from aiogram.dispatcher.fsm.storage.redis import DefaultKeyBuilder, RedisStorage
 from aiogram_dialog import DialogRegistry
@@ -40,8 +40,6 @@ async def main():
 
     bot = Bot(token=config.tg_bot.token, parse_mode="HTML")
     dp = Dispatcher(storage=storage, events_isolation=SimpleEventIsolation())
-    admin_router = Router()
-    dp.include_router(admin_router)
 
     dialog_registry = DialogRegistry(dp)
 
@@ -51,7 +49,7 @@ async def main():
     )
     event_dispatcher = EventDispatcher()
 
-    register_handlers(dp=dp, admin_router=admin_router, dialog_registry=dialog_registry)
+    register_handlers(dp=dp, dialog_registry=dialog_registry)
 
     map_tables()
 

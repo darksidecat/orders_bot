@@ -9,7 +9,7 @@ from app.domain.goods.interfaces.persistence import IGoodsReader, IGoodsRepo
 from app.domain.goods.interfaces.uow import IGoodsUoW
 from app.domain.market.interfaces.persistence import IMarketReader, IMarketRepo
 from app.domain.market.interfaces.uow import IMarketUoW
-from app.domain.order.interfaces.persistence import IOrderRepo, IOrderReader
+from app.domain.order.interfaces.persistence import IOrderReader, IOrderRepo
 from app.domain.order.interfaces.uow import IOrderUoW
 from app.domain.user.interfaces.persistence import IUserReader, IUserRepo
 from app.domain.user.interfaces.uow import IUserUoW

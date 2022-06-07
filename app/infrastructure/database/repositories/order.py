@@ -3,10 +3,10 @@ from uuid import UUID
 
 from sqlalchemy import insert
 
+from app.domain.order import dto
 from app.domain.order.interfaces.persistence import IOrderReader, IOrderRepo
 from app.domain.order.models.order import Order, OrderLine
 from app.infrastructure.database.repositories.repo import SQLAlchemyRepo
-from app.domain.order import dto
 
 
 class OrderReader(SQLAlchemyRepo, IOrderReader):
@@ -19,11 +19,15 @@ class OrderReader(SQLAlchemyRepo, IOrderReader):
 
 class OrderRepo(SQLAlchemyRepo, IOrderRepo):
     async def create_order(self, order: dto.OrderCreate) -> Order:
-        query = insert(Order).values(
-            creator_id=order.creator_id,
-            recipient_market_id=order.recipient_market_id,
-            commentary=order.commentary,
-        ).returning(Order.id)
+        query = (
+            insert(Order)
+            .values(
+                creator_id=order.creator_id,
+                recipient_market_id=order.recipient_market_id,
+                commentary=order.commentary,
+            )
+            .returning(Order.id)
+        )
         result = await self.session.execute(query)
         new_order_id = result.scalar_one()
 
@@ -36,6 +40,8 @@ class OrderRepo(SQLAlchemyRepo, IOrderRepo):
             await self.session.execute(query)
 
         new_order: Order = await self.session.get(Order, new_order_id)
+
+        print(new_order)
 
         new_order.create()
         return new_order

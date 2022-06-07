@@ -16,6 +16,7 @@ from app.domain.market import dto
 class Market(Aggregate):
     id: UUID = attrs.field(validator=validators.instance_of(UUID), factory=uuid.uuid4)
     name: str = attrs.field(validator=validators.instance_of(str))
+    is_active: bool = attrs.field(validator=validators.instance_of(bool), default=True)
 
     @classmethod
     def create(cls, name: str) -> Market:
