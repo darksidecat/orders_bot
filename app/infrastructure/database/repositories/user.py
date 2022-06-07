@@ -5,7 +5,8 @@ from pydantic import parse_obj_as
 from sqlalchemy import select
 
 from app.domain.access_levels.exceptions.access_levels import AccessLevelNotExist
-from app.domain.access_levels.models.access_level import AccessLevel
+from app.domain.access_levels.models.access_level import AccessLevel, LevelName
+from app.domain.access_levels.models.helper import Levels
 from app.domain.user import dto
 from app.domain.user.exceptions.user import UserNotExists
 from app.domain.user.interfaces.persistence import IUserReader, IUserRepo
@@ -20,6 +21,16 @@ class UserReader(SQLAlchemyRepo, IUserReader):
     @exception_mapper
     async def all_users(self) -> List[dto.User]:
         query = select(TelegramUser)
+
+        result = await self.session.execute(query)
+        users = result.scalars().all()
+
+        return parse_obj_as(List[dto.User], users)
+
+    async def users_for_confirmation(self) -> List[dto.User]:
+        query = select(TelegramUser).where(
+            TelegramUser.access_levels.any(name=LevelName.CONFIRMATION)
+        )
 
         result = await self.session.execute(query)
         users = result.scalars().all()

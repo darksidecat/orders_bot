@@ -10,6 +10,8 @@ from app.config import load_config
 from app.domain.common.events.dispatcher import EventDispatcher
 from app.infrastructure.database.db import sa_sessionmaker
 from app.infrastructure.database.models import map_tables
+from app.tgbot.event_handlers.add_order import setup_event_handlers
+from app.tgbot.event_handlers.setup_middlewares import setup_event_middlewares
 from app.tgbot.handlers import register_handlers
 from app.tgbot.middlewares import setup_middlewares
 from app.tgbot.services.set_commands import set_commands
@@ -47,7 +49,12 @@ async def main():
         dp=dp,
         sessionmaker=session_factory,
     )
-    event_dispatcher = EventDispatcher()
+    event_dispatcher = EventDispatcher(bot=bot)
+    setup_event_handlers(event_dispatcher=event_dispatcher)
+    setup_event_middlewares(
+        dp=event_dispatcher,
+        sessionmaker=session_factory,
+    )
 
     register_handlers(dp=dp, dialog_registry=dialog_registry)
 

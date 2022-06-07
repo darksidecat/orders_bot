@@ -39,3 +39,7 @@ class User(BaseUser):
     @property
     def is_admin(self) -> bool:
         return Levels.ADMINISTRATOR.name in [l.name.name for l in self.access_levels]
+
+    @property
+    def can_confirm_order(self) -> bool:
+        return Levels.CONFIRMATION.name in [l.name.name for l in self.access_levels]

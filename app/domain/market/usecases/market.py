@@ -10,7 +10,7 @@ from app.domain.market import dto
 from app.domain.market.exceptions.market import CantDeleteWithOrders
 from app.domain.market.interfaces.uow import IMarketUoW
 from app.domain.market.models.market import Market
-from app.domain.user.access_policy import UserAccessPolicy
+from app.domain.user.access_policy import AccessPolicy
 
 logger = logging.getLogger(__name__)
 
@@ -73,7 +73,7 @@ class MarketService:
     def __init__(
         self,
         uow: IMarketUoW,
-        access_policy: UserAccessPolicy,
+        access_policy: AccessPolicy,
         event_dispatcher: EventDispatcher,
     ) -> None:
         self.uow = uow

@@ -9,6 +9,7 @@ class Levels(Enum):
     BLOCKED = AccessLevel(id=-1, name=LevelName.BLOCKED)
     ADMINISTRATOR = AccessLevel(id=1, name=LevelName.ADMINISTRATOR)
     USER = AccessLevel(id=2, name=LevelName.USER)
+    CONFIRMATION = AccessLevel(id=3, name=LevelName.CONFIRMATION)
 
 
 def id_to_access_levels(level_ids: Iterable[int]):

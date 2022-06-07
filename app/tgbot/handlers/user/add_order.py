@@ -28,7 +28,6 @@ from app.tgbot.constants import (
 from app.tgbot.handlers.admin.goods.add import result_getter
 from app.tgbot.handlers.admin.goods.edit import (
     get_current_goods,
-    get_goods,
     go_to_next_level,
     go_to_parent_folder,
     selected_goods_data,
@@ -36,25 +35,6 @@ from app.tgbot.handlers.admin.goods.edit import (
 from app.tgbot.handlers.admin.market.edit import save_selected_market_id
 from app.tgbot.handlers.admin.user.common import get_user_data
 from app.tgbot.handlers.dialogs.common import enable_send_mode
-
-
-async def add_new_order(
-    event: CallbackQuery, button, dialog_manager: DialogManager, **kwargs
-):
-    order_service: OrderService = dialog_manager.data.get("order_service")
-    order_lines = [
-        OrderLineCreate(
-            goods_id=UUID("248fcc7a-5359-4072-8f5a-241f165eb01a"), quantity=100
-        )
-    ]
-    order_data = OrderCreate(
-        order_lines=order_lines,
-        creator_id=event.from_user.id,
-        recipient_market_id=UUID("eec79506-c6d7-4bee-94c7-1d13479a10fe"),
-        commentary="test",
-    )
-
-    await order_service.add_order(order_data)
 
 
 async def get_active_goods(
@@ -103,7 +83,14 @@ async def add_order_yes_no(
 
     new_order = await order_service.add_order(order)
 
-    result = fmt.quote(f"Order created\n" f"id:           {new_order.id}\n" f"goods:\n")
+    result = fmt.quote(
+        f"Order created\n"
+        f"id:           {new_order.id}\n"
+        f"creator:   {new_order.creator.name}\n"
+        f"market: {new_order.recipient_market}\n"
+        f"commentary:   {new_order.commentary}\n"
+        f"goods:\n"
+    )
     for line in new_order.order_lines:
         result += fmt.quote(
             f"    name:           {line.goods.name}\n"

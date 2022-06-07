@@ -8,6 +8,9 @@ class IUserReader(Protocol):
     async def all_users(self) -> List[UserDTO]:
         ...
 
+    async def users_for_confirmation(self) -> List[UserDTO]:
+        ...
+
     async def user_by_id(self, user_id: int) -> UserDTO:
         ...
 

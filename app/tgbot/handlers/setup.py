@@ -22,7 +22,9 @@ def register_handlers(dp: Dispatcher, dialog_registry: DialogRegistry):
     register_admin_handlers(admin_router, dialog_registry)
 
     # chief router
-    register_chief_handlers(dp)
+    chief_router = Router()
+    dp.include_router(chief_router)
+    register_chief_handlers(chief_router)
 
     # user router
     allowed_access_levels = [

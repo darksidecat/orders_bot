@@ -44,11 +44,6 @@ user_table = Table(
 
 
 def map_user():
-    class UpdatedLevels(Enum):  # ToDo
-        BLOCKED = AccessLevel(id=-1, name=LevelName.BLOCKED)
-        ADMINISTRATOR = AccessLevel(id=1, name=LevelName.ADMINISTRATOR)
-        USER = AccessLevel(id=2, name=LevelName.USER)
-
     mapper_registry.map_imperatively(
         TelegramUser,
         user_table,
@@ -78,5 +73,11 @@ def map_user():
             )
         },
     )
+
+    class UpdatedLevels(Enum):  # ToDo
+        BLOCKED = AccessLevel(id=-1, name=LevelName.BLOCKED)
+        ADMINISTRATOR = AccessLevel(id=1, name=LevelName.ADMINISTRATOR)
+        USER = AccessLevel(id=2, name=LevelName.USER)
+        CONFIRMATION = AccessLevel(id=3, name=LevelName.CONFIRMATION)
 
     helper.Levels = UpdatedLevels

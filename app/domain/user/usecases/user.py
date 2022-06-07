@@ -7,7 +7,7 @@ from app.domain.common.events.dispatcher import EventDispatcher
 from app.domain.common.exceptions.base import AccessDenied
 from app.domain.common.exceptions.repo import IntegrityViolationError
 from app.domain.user import dto
-from app.domain.user.access_policy import UserAccessPolicy
+from app.domain.user.access_policy import AccessPolicy
 from app.domain.user.exceptions.user import CantDeleteWithOrders, UserAlreadyExists
 from app.domain.user.interfaces.uow import IUserUoW
 from app.domain.user.models.user import TelegramUser
@@ -24,6 +24,12 @@ class UserUseCase(ABC):
 class GetUsers(UserUseCase):
     async def __call__(self) -> List[dto.User]:
         users = await self.uow.user_reader.all_users()
+        return users
+
+
+class GetUsersForConfirmation(UserUseCase):
+    async def __call__(self) -> List[dto.User]:
+        users = await self.uow.user_reader.users_for_confirmation()
         return users
 
 
@@ -139,7 +145,7 @@ class UserService:
     def __init__(
         self,
         uow: IUserUoW,
-        access_policy: UserAccessPolicy,
+        access_policy: AccessPolicy,
         event_dispatcher: EventDispatcher,
     ) -> None:
         self.uow = uow
@@ -150,6 +156,13 @@ class UserService:
         if not self.access_policy.read_users():
             raise AccessDenied()
         return await GetUsers(uow=self.uow, event_dispatcher=self.event_dispatcher)()
+
+    async def get_users_for_confirmation(self) -> List[dto.User]:
+        if not self.access_policy.read_users():
+            raise AccessDenied()
+        return await GetUsersForConfirmation(
+            uow=self.uow, event_dispatcher=self.event_dispatcher
+        )()
 
     async def get_user(self, user_id: int) -> dto.User:
         if not (

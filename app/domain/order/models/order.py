@@ -13,6 +13,7 @@ from app.domain.common.models.entity import entity
 from app.domain.goods.models.goods import Goods
 from app.domain.market.models.market import Market
 from app.domain.order import dto
+from app.domain.user.dto import User
 from app.domain.user.models.user import TelegramUser
 
 
@@ -59,7 +60,19 @@ class Order(Aggregate):
     def add_order_line(self, order_line: OrderLine):
         self.order_lines.append(order_line)
 
+    def change_confirm_status(self, status: ConfirmedStatus, confirmed_by: User):
+        self.confirmed = status
+        self.events.append(
+            OrderConfirmStatusChanged(dto.order.Order.from_orm(self), confirmed_by)
+        )
+
 
 class OrderCreated(Event):
     def __init__(self, order: dto.Order):
         self.order = order
+
+
+class OrderConfirmStatusChanged(Event):
+    def __init__(self, order: dto.Order, user: User):
+        self.order = order
+        self.user = user

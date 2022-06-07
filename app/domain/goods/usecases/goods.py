@@ -19,7 +19,7 @@ from app.domain.goods.exceptions.goods import (
 from app.domain.goods.interfaces.uow import IGoodsUoW
 from app.domain.goods.models.goods import Goods
 from app.domain.goods.models.goods_type import GoodsType
-from app.domain.user.access_policy import UserAccessPolicy
+from app.domain.user.access_policy import AccessPolicy
 
 logger = logging.getLogger(__name__)
 
@@ -126,7 +126,7 @@ class GoodsService:
     def __init__(
         self,
         uow: IGoodsUoW,
-        access_policy: UserAccessPolicy,
+        access_policy: AccessPolicy,
         event_dispatcher: EventDispatcher,
     ) -> None:
         self.uow = uow
