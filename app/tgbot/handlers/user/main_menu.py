@@ -1,8 +1,17 @@
-from aiogram_dialog import Dialog, Window
-from aiogram_dialog.widgets.kbd import Button, Start
-from aiogram_dialog.widgets.text import Const, Text
+from aiogram import F
+from aiogram_dialog import Dialog, Window, DialogManager
+from aiogram_dialog.widgets.kbd import Start
+from aiogram_dialog.widgets.text import Const
 
+from app.domain.user.dto import User
 from app.tgbot.states import add_order, admin_menu, main_menu
+
+
+async def get_user(
+    dialog_manager: DialogManager, user: User, **kwargs
+):
+    return {"user": user}
+
 
 main_menu_dialog = Dialog(
     Window(
@@ -11,8 +20,12 @@ main_menu_dialog = Dialog(
             Const("➕ Add order"), id="add_order", state=add_order.AddOrder.select_goods
         ),
         Start(
-            Const("⚙️ Admin menu"), id="admin_menu", state=admin_menu.AdminMenu.category
+            Const("⚙️ Admin menu"),
+            id="admin_menu",
+            state=admin_menu.AdminMenu.category,
+            when=F["user"].is_admin,
         ),
+        getter=get_user,
         state=main_menu.MainMenu.select_option,
     ),
 )
