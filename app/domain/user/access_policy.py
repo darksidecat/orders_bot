@@ -10,7 +10,7 @@ class AccessPolicy(Protocol):
     def read_users(self) -> bool:
         ...
 
-    def modify_user(self) -> bool:
+    def modify_users(self) -> bool:
         ...
 
     def read_goods(self) -> bool:
@@ -25,13 +25,19 @@ class AccessPolicy(Protocol):
     def modify_markets(self) -> bool:
         ...
 
-    def add_order(self) -> bool:
+    def add_orders(self) -> bool:
+        ...
+
+    def read_orders(self) -> bool:
+        ...
+
+    def modify_orders(self) -> bool:
         ...
 
     def read_user_self(self, user_id: int):
         ...
 
-    def confirm_order(self) -> bool:
+    def confirm_orders(self) -> bool:
         ...
 
 
@@ -44,44 +50,44 @@ class AllowPolicy(AccessPolicy):
 
     read_access_levels = allow
     read_users = allow
-    modify_user = allow
+    modify_users = allow
     read_goods = allow
     modify_goods = allow
 
     read_markets = allow
     modify_markets = allow
 
-    read_order = allow
-    modify_order = allow
-    add_order = allow
-    confirm_order = allow
+    read_orders = allow
+    modify_orders = allow
+    add_orders = allow
+    confirm_orders = allow
 
 
 class UserAccessPolicy(AccessPolicy):
     def __init__(self, user: User):
         self.user = user
 
-    def read_access_levels(self):
+    def _is_not_blocked(self):
         return not self.user.is_blocked
 
-    def read_users(self):
+    def _is_admin(self):
         return self.user.is_admin
 
-    def modify_user(self):
-        return self.user.is_admin
+    read_users = _is_admin
+    modify_users = _is_admin
+    read_access_levels = _is_not_blocked
+    read_goods = _is_not_blocked
+    modify_goods = _is_admin
 
-    def confirm_order(self) -> bool:
-        return self.user.can_confirm_order
+    read_markets = _is_not_blocked
+    modify_markets = _is_admin
 
-    read_goods = read_users
-    modify_goods = modify_user
-
-    read_markets = read_users
-    modify_markets = modify_user
-
-    read_order = read_users
-    modify_order = modify_user
-    add_order = read_users
+    read_orders = _is_admin
+    modify_orders = _is_admin
+    add_orders = _is_not_blocked
 
     def read_user_self(self, user_id: int):
         return self.user.id == user_id
+
+    def confirm_orders(self) -> bool:
+        return self.user.can_confirm_order

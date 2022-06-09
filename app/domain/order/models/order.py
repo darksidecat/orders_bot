@@ -59,6 +59,9 @@ class Order(Aggregate):
             OrderConfirmStatusChanged(dto.order.Order.from_orm(self), confirmed_by)
         )
 
+    def add_order_message(self, order_message: OrderMessage):
+        self.order_messages.append(order_message)
+
 
 class OrderCreated(Event):
     def __init__(self, order: dto.Order):

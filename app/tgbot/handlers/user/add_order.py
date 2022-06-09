@@ -21,6 +21,7 @@ from aiogram_dialog.widgets.text import Const, Format, Multi
 from app.domain.goods.models.goods_type import GoodsType
 from app.domain.goods.usecases.goods import GoodsService
 from app.domain.market.usecases import MarketService
+from app.domain.order import dto
 from app.domain.order.dto import OrderCreate, OrderLineCreate
 from app.domain.order.usecases.order import OrderService
 from app.tgbot import states
@@ -79,6 +80,23 @@ async def save_quantity(
     await dialog_manager.dialog().next()
 
 
+def format_order_message(order: dto.Order):
+    result = fmt.quote(
+        f"Id:       {str(order.id)}\n"
+        f"Creator:  {order.creator.name}\n"
+        f"Market:   {order.recipient_market.name}\n"
+        f"Comments: {order.commentary}\n\n"
+        f"Status:   {order.confirmed.value} {order.confirmed_icon}\n"
+        f"Goods:\n"
+    )
+    for line in order.order_lines:
+        result += fmt.quote(
+            f"  Name:       {line.goods.name}\n" f"  Quantity:   {line.quantity}\n\n"
+        )
+    result = fmt.pre(result)
+    return result
+
+
 async def add_order_yes_no(
     query: CallbackQuery,
     select: ManagedWidgetAdapter[Select],
@@ -105,20 +123,7 @@ async def add_order_yes_no(
     )
 
     new_order = await order_service.add_order(order)
-
-    result = fmt.quote(
-        f"Order created\n\n"
-        f"id:       {str(new_order.id)}\n"
-        f"creator:  {new_order.creator.name}\n"
-        f"market:   {new_order.recipient_market.name}\n"
-        f"comments: {new_order.commentary}\n"
-        f"goods:\n"
-    )
-    for line in new_order.order_lines:
-        result += fmt.quote(
-            f"  name:       {line.goods.name}\n" f"  quantity:   {line.quantity}\n\n"
-        )
-    data["result"] = fmt.pre(result)
+    data["result"] = format_order_message(new_order)
 
     await manager.dialog().next()
     await query.answer()
@@ -261,6 +266,7 @@ add_order_dialog = Dialog(
         parse_mode="HTML",
     ),
     Window(
+        Const("Order created\n\n"),
         Format("{result}"),
         Cancel(Const("❌ Close"), on_click=enable_send_mode),
         getter=[result_getter],

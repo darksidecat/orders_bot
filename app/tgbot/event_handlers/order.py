@@ -6,43 +6,47 @@ from aiogram.exceptions import TelegramAPIError
 from aiogram.utils.text_decorations import html_decoration as fmt
 
 from app.domain.common.events.dispatcher import EventDispatcher
+from app.domain.order.dto.order import OrderMessageCreate
 from app.domain.order.models.order import OrderConfirmStatusChanged, OrderCreated
+from app.domain.order.usecases.order import OrderService
 from app.domain.user.dto import User
 from app.domain.user.usecases.user import UserService
 from app.tgbot.handlers.chief.order_confirm import confirm_order_keyboard
+from app.tgbot.handlers.user.add_order import format_order_message
 
 logger = logging.getLogger(__name__)
 
 
 async def order_created_handler(event: OrderCreated, data: dict[str, Any]):
     user_service: UserService = data["user_service"]
+    order_service: OrderService = data["order_service"]
+
     bot: Bot = data["bot"]
 
     users: list[User] = await user_service.get_users_for_confirmation()
 
-    message = (
+    message = fmt.pre(
         f"New order from {event.order.creator.name}\n\n"
-        f"Order id:     {event.order.id}\n"
-        f"Order market: {event.order.recipient_market.name}\n"
-        f"Order comment:{event.order.commentary}\n\n"
-    )
-    for order_line in event.order.order_lines:
-        message += (
-            f"  Goods:      {order_line.goods.name}\n"
-            f"  Quantity:   {order_line.quantity}\n"
-        )
-    message = fmt.pre(message)
+    ) + format_order_message(event.order)
 
+    sent_messages = []
     for user in users:
         try:
-            await bot.send_message(
+            message = await bot.send_message(
                 chat_id=user.id,
                 text=message,
                 reply_markup=confirm_order_keyboard(event.order.id),
             )
+            sent_messages.append(
+                OrderMessageCreate(
+                    message_id=message.message_id, chat_id=message.chat.id
+                )
+            )
         except TelegramAPIError as e:
             logger.error(e)
             continue
+
+    await order_service.add_order_messages(event.order.id, sent_messages)
 
 
 async def order_confirm_handler(event: OrderConfirmStatusChanged, data: dict[str, Any]):
@@ -50,7 +54,8 @@ async def order_confirm_handler(event: OrderConfirmStatusChanged, data: dict[str
 
     await bot.send_message(
         chat_id=event.order.creator.id,
-        text=f"Order {event.order.id} confirmed by {event.user.name}. Status: {event.order.confirmed.value}",
+        text=f"Order {event.order.id} confirmed by {event.user.name}\n\n"
+        + format_order_message(event.order),
     )
 
 

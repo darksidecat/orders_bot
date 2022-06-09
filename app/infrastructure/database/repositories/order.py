@@ -4,6 +4,7 @@ from uuid import UUID
 from sqlalchemy import insert
 
 from app.domain.order import dto
+from app.domain.order.exceptions.order import OrderNotExists
 from app.domain.order.interfaces.persistence import IOrderReader, IOrderRepo
 from app.domain.order.models.order import Order, OrderLine
 from app.infrastructure.database.repositories.repo import SQLAlchemyRepo
@@ -13,8 +14,13 @@ class OrderReader(SQLAlchemyRepo, IOrderReader):
     async def all_orders(self) -> List[dto.Order]:
         ...
 
-    async def order_by_id(self, goods_id: UUID) -> dto.Order:
-        ...
+    async def order_by_id(self, order_id: UUID) -> Order:
+        order = await self.session.get(Order, order_id)
+
+        if not order:
+            raise OrderNotExists(f"Order with id {order_id} not exists")
+
+        return dto.Order.from_orm(order)
 
 
 class OrderRepo(SQLAlchemyRepo, IOrderRepo):
@@ -41,19 +47,17 @@ class OrderRepo(SQLAlchemyRepo, IOrderRepo):
 
         new_order: Order = await self.session.get(Order, new_order_id)
 
-        print(new_order)
-
         new_order.create()
         return new_order
 
-    async def add_order(self, order: Order) -> Order:
-        ...
-
     async def order_by_id(self, order_id: UUID) -> Order:
-        return await self.session.get(Order, order_id)
+        order = await self.session.get(Order, order_id)
 
-    async def delete_order(self, goods_id: UUID) -> None:
-        ...
+        if not order:
+            raise OrderNotExists(f"Order with id {order_id} not exists")
 
-    async def edit_order(self, goods: Order) -> Order:
-        ...
+        return order
+
+    async def edit_order(self, order: Order) -> Order:
+        await self.session.flush()
+        return order

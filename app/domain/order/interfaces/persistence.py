@@ -17,13 +17,7 @@ class IOrderRepo(Protocol):
     async def create_order(self, order: dto.OrderCreate) -> Order:
         ...
 
-    async def add_order(self, order: Order) -> Order:
-        ...
-
     async def order_by_id(self, order_id: UUID) -> Order:
-        ...
-
-    async def delete_order(self, goods_id: UUID) -> None:
         ...
 
     async def edit_order(self, goods: Order) -> Order:

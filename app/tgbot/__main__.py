@@ -10,7 +10,7 @@ from app.config import load_config
 from app.domain.common.events.dispatcher import EventDispatcher
 from app.infrastructure.database.db import sa_sessionmaker
 from app.infrastructure.database.models import map_tables
-from app.tgbot.event_handlers.add_order import setup_event_handlers
+from app.tgbot.event_handlers.order import setup_event_handlers
 from app.tgbot.event_handlers.setup_middlewares import setup_event_middlewares
 from app.tgbot.handlers import register_handlers
 from app.tgbot.middlewares import setup_middlewares

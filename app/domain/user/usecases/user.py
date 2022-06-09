@@ -175,21 +175,21 @@ class UserService:
         )
 
     async def add_user(self, user: dto.UserCreate) -> dto.User:
-        if not self.access_policy.modify_user():
+        if not self.access_policy.modify_users():
             raise AccessDenied()
         return await AddUser(uow=self.uow, event_dispatcher=self.event_dispatcher)(
             user=user
         )
 
     async def delete_user(self, user_id: int) -> None:
-        if not self.access_policy.modify_user():
+        if not self.access_policy.modify_users():
             raise AccessDenied()
         return await DeleteUser(uow=self.uow, event_dispatcher=self.event_dispatcher)(
             user_id=user_id
         )
 
     async def patch_user(self, new_user: dto.UserPatch) -> dto.User:
-        if not self.access_policy.modify_user():
+        if not self.access_policy.modify_users():
             raise AccessDenied()
         return await PatchUser(uow=self.uow, event_dispatcher=self.event_dispatcher)(
             new_user=new_user

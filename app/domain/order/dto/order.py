@@ -20,6 +20,16 @@ class OrderLine(DTO):
     goods: Goods
 
 
+class OrderMessageCreate(DTO):
+    message_id: int
+    chat_id: int
+
+
+class OrderMessage(DTO):
+    message_id: int
+    chat_id: int
+
+
 class Order(DTO):
     id: UUID
     order_lines: list[OrderLine]
@@ -28,6 +38,16 @@ class Order(DTO):
     recipient_market: Market
     commentary: str
     confirmed: ConfirmedStatus
+    order_messages: list[OrderMessage]
+
+    @property
+    def confirmed_icon(self):
+        if self.confirmed == ConfirmedStatus.YES:
+            return "✅"
+        elif self.confirmed == ConfirmedStatus.NO:
+            return "❌"
+        else:
+            return ""
 
 
 class OrderCreate(DTO):
