@@ -10,12 +10,12 @@ from app.tgbot.states import admin_menu
 admin_menu_dialog = Dialog(
     Window(
         Const("Select category"),
-        Start(Const("User"), id="user_menu", state=admin_menu.UserCategory.action),
-        Start(Const("Goods"), id="goods_menu", state=admin_menu.GoodsCategory.action),
+        Start(Const("👤 User"), id="user_menu", state=admin_menu.UserCategory.action),
+        Start(Const("📦 Goods"), id="goods_menu", state=admin_menu.GoodsCategory.action),
         Start(
-            Const("Market"), id="market_menu", state=admin_menu.MarketCategory.action
+            Const("🌍 Market"), id="market_menu", state=admin_menu.MarketCategory.action
         ),
-        Cancel(),
+        Cancel(Const("❌ Close")),
         state=admin_menu.AdminMenu.category,
     ),
 )

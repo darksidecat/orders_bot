@@ -91,14 +91,14 @@ async def on_field_selected(
     manager: DialogManager,
     item_id: str,
 ):
-    COLUMN_STATES = {
+    column_states = {
         TelegramUser.id.name: states.user_db.EditUserId.request,
         TelegramUser.name.name: states.user_db.EditUserName.request,
         TelegramUser.access_levels.key: states.user_db.EditAccessLevel.request,
     }
 
     await manager.start(
-        state=COLUMN_STATES[item_id],
+        state=column_states[item_id],
         data=manager.current_context().dialog_data.copy(),
     )
     await query.answer()
@@ -125,6 +125,8 @@ async def get_user_edit_data(
 
 
 async def process_result(start_data: Data, result: Any, dialog_manager: DialogManager):
+    if not result:
+        return
     if result.get(USER_ID):
         dialog_manager.current_context().dialog_data[USER_ID] = result[USER_ID]
     if result.get(USER_NAME):
@@ -195,11 +197,13 @@ async def save_edited_user(
     new_user = await user_service.patch_user(user)
     levels_names = ", ".join((level.name.name for level in new_user.access_levels))
 
-    result = fmt.quote(
-        f"User {data[OLD_USER_ID]} edited\n"
-        f"id:           {new_user.id}\n"
-        f"name:         {new_user.name}\n"
-        f"access level: {levels_names}\n"
+    result = fmt.pre(
+        fmt.quote(
+            f"User {data[OLD_USER_ID]} edited\n\n"
+            f"id:           {new_user.id}\n"
+            f"name:         {new_user.name}\n"
+            f"access level: {levels_names}\n"
+        )
     )
     data["result"] = result
 
@@ -211,6 +215,7 @@ user_id_dialog = Dialog(
     Window(
         Format("Input new id for {user.id}"),
         MessageInput(request_id),
+        Cancel(Const("❌ Cancel")),
         getter=get_old_user,
         state=states.user_db.EditUserId.request,
     ),
@@ -221,6 +226,7 @@ user_name_dialog = Dialog(
     Window(
         Format("Input new name for {user.id}"),
         MessageInput(request_name),
+        Cancel(Const("❌ Cancel")),
         getter=get_old_user,
         state=states.user_db.EditUserName.request,
     ),
@@ -240,10 +246,11 @@ user_access_levels_dialog = Dialog(
             )
         ),
         Button(
-            Const("Save"),
+            Const("💾 Save"),
             id="save_access_levels",
             on_click=save_access_levels,
         ),
+        Cancel(Const("❌ Cancel")),
         getter=get_access_levels,
         state=states.user_db.EditAccessLevel.request,
     ),
@@ -266,7 +273,7 @@ edit_user_dialog = Dialog(
             width=1,
             height=8,
         ),
-        Cancel(),
+        Cancel(Const("❌ Cancel")),
         getter=get_users,
         state=states.user_db.EditUser.select_user,
         preview_add_transitions=[Next()],
@@ -285,7 +292,7 @@ edit_user_dialog = Dialog(
                 on_click=on_field_selected,
             ),
             Button(Const("Save"), id="save", on_click=save_edited_user),
-            Cancel(),
+            Cancel(Const("❌ Cancel")),
         ),
         getter=get_user_edit_data,
         state=states.user_db.EditUser.select_field,
@@ -299,7 +306,7 @@ edit_user_dialog = Dialog(
     ),
     Window(
         Format("{result}"),
-        Cancel(Const("Close"), on_click=enable_send_mode),
+        Cancel(Const("❌ Close"), on_click=enable_send_mode),
         getter=get_result,
         state=states.user_db.EditUser.result,
         parse_mode="HTML",

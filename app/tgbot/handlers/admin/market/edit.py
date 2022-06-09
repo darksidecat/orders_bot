@@ -119,8 +119,8 @@ edit_goods_dialog = Dialog(
             width=1,
             height=8,
         ),
-        Button(Const("Add new"), on_click=add_new_market, id="add_new_market"),
-        Cancel(),
+        Button(Const("➕ Add new"), on_click=add_new_market, id="add_new_market"),
+        Cancel(Const("❌ Close")),
         getter=get_markets,
         state=states.market_db.EditMarket.select_market,
     ),
@@ -130,9 +130,9 @@ edit_goods_dialog = Dialog(
         Button(
             Const("Edit name"), on_click=start_edit_market_name_dialog, id="edit_name"
         ),
-        Button(Const("Delete"), on_click=delete_market, id="delete_goods"),
-        Back(),
-        Cancel(),
+        Button(Const("🗑️ Delete"), on_click=delete_market, id="delete_goods"),
+        Back(Const("🔙 Back")),
+        Cancel(Const("❌ Close")),
         getter=get_selected_market,
         state=states.market_db.EditMarket.select_action,
     ),

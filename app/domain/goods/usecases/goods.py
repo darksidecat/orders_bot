@@ -79,7 +79,9 @@ class ChangeGoodsStatus(GoodsUseCase):
         goods.is_active = not goods.is_active
 
         if goods.is_active is False:
-            children = await self.uow.goods_reader.goods_in_folder(parent_id=goods.id)
+            children = await self.uow.goods_reader.goods_in_folder(
+                parent_id=goods.id, only_active=False
+            )
             children_statuses = (
                 [child.is_active for child in children] if children else []
             )

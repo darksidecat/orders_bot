@@ -6,6 +6,7 @@ from uuid import UUID
 from app.domain.common.dto.base import DTO
 from app.domain.goods.dto import Goods
 from app.domain.market.dto import Market
+from app.domain.order.models.confirmed_status import ConfirmedStatus
 from app.domain.user.dto import User
 
 
@@ -26,6 +27,7 @@ class Order(DTO):
     created_at: datetime
     recipient_market: Market
     commentary: str
+    confirmed: ConfirmedStatus
 
 
 class OrderCreate(DTO):

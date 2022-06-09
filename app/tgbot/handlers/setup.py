@@ -6,9 +6,12 @@ from ..filters import AccessLevelFilter
 from .admin import register_admin_handlers
 from .chief import register_chief_handlers
 from .user import register_user_handlers
+from .user.start import register_start
 
 
 def register_handlers(dp: Dispatcher, dialog_registry: DialogRegistry):
+    register_start(dp)
+
     # admin router
     admin_router = Router()
     dp.include_router(admin_router)
@@ -32,10 +35,10 @@ def register_handlers(dp: Dispatcher, dialog_registry: DialogRegistry):
         LevelName.CONFIRMATION,
         LevelName.ADMINISTRATOR,
     ]
-    admin_router.message.filter(AccessLevelFilter(access_levels=allowed_access_levels))
-    admin_router.callback_query.filter(
+    user_router = Router()
+    user_router.message.filter(AccessLevelFilter(access_levels=allowed_access_levels))
+    user_router.callback_query.filter(
         AccessLevelFilter(access_levels=allowed_access_levels)
     )
-    user_router = Router()
     dp.include_router(user_router)
     register_user_handlers(dp, user_router, dialog_registry)

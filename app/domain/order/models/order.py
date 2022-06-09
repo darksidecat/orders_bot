@@ -1,7 +1,6 @@
 import uuid
 from datetime import datetime
-from enum import Enum, unique
-from typing import List, Optional
+from typing import List
 from uuid import UUID
 
 import attrs
@@ -13,15 +12,9 @@ from app.domain.common.models.entity import entity
 from app.domain.goods.models.goods import Goods
 from app.domain.market.models.market import Market
 from app.domain.order import dto
+from app.domain.order.models.confirmed_status import ConfirmedStatus
 from app.domain.user.dto import User
 from app.domain.user.models.user import TelegramUser
-
-
-@unique
-class ConfirmedStatus(Enum):
-    YES = "YES"
-    NO = "NO"
-    NOT_PROCESSED = "NOT_PROCESSED"
 
 
 @entity

@@ -38,7 +38,7 @@ async def request_id(
     message: Message, dialog: ManagedDialogAdapterProto, manager: DialogManager
 ):
     if not message.text.isdigit():
-        await message.answer("User id value must be digit")
+        await message.answer("User id must be a number")
         return
 
     manager.current_context().dialog_data[USER_ID] = message.text
@@ -76,7 +76,7 @@ async def add_user_yes_no(
     data = manager.current_context().dialog_data
 
     if item_id == NO:
-        data["result"] = "User adding cancelled"
+        await query.answer("User adding cancelled")
         await manager.done()
         return
 
@@ -87,7 +87,7 @@ async def add_user_yes_no(
         new_user = await user_service.add_user(user)
         levels_names = ", ".join((level.name.name for level in new_user.access_levels))
 
-        result = fmt.quote(
+        result = fmt.pre(
             f"User created\n"
             f"id:           {data[USER_ID]}\n"
             f"name:         {fmt.quote(data[USER_NAME])}\n"
@@ -111,7 +111,7 @@ add_user_dialog = Dialog(
         user_adding_process,
         Const("Input user id:"),
         MessageInput(request_id),
-        Row(Cancel(), Next(when=USER_ID)),
+        Row(Cancel(Const("❌ Cancel")), Next(Const("➡ Next️"), when=USER_ID)),
         getter=get_user_data,
         state=states.user_db.AddUser.id,
         parse_mode="HTML",
@@ -120,7 +120,11 @@ add_user_dialog = Dialog(
         user_adding_process,
         Format("Input user name:"),
         MessageInput(request_name),
-        Row(Back(), Cancel(), Next(when=USER_NAME)),
+        Row(
+            Back(Const("⬅️ Back")),
+            Cancel(Const("❌ Cancel")),
+            Next(Const("➡ Next️"), when=USER_NAME),
+        ),
         getter=get_user_data,
         state=states.user_db.AddUser.name,
         parse_mode="HTML",
@@ -138,11 +142,15 @@ add_user_dialog = Dialog(
             )
         ),
         Button(
-            Const("Save"),
+            Const("💾 Save"),
             id="save_access_levels",
             on_click=save_selected_access_levels,
         ),
-        Row(Back(), Cancel(), Next(when=ACCESS_LEVELS)),
+        Row(
+            Back(Const("⬅️ Back")),
+            Cancel(Const("❌ Cancel")),
+            Next(Const("➡ Next️"), when=ACCESS_LEVELS),
+        ),
         getter=get_access_levels,
         state=states.user_db.AddUser.access_level,
         parse_mode="HTML",
@@ -157,7 +165,7 @@ add_user_dialog = Dialog(
             items=YES_NO,
             on_click=add_user_yes_no,
         ),
-        Row(Back(), Cancel()),
+        Row(Back(Const("⬅️ Back")), Cancel(Const("❌ Cancel"))),
         getter=get_user_data,
         state=states.user_db.AddUser.confirm,
         parse_mode="HTML",
@@ -165,7 +173,7 @@ add_user_dialog = Dialog(
     ),
     Window(
         Format("{result}"),
-        Cancel(Const("Close"), on_click=enable_send_mode),
+        Cancel(Const("❌ Close"), on_click=enable_send_mode),
         getter=get_result,
         state=states.user_db.AddUser.result,
         parse_mode="HTML",

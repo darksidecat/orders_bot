@@ -85,13 +85,15 @@ async def add_goods_yes_no(
 
     goods = await goods_service.add_goods(goods)
 
-    result = fmt.quote(
-        f"Goods created\n"
-        f"id:   {goods.id}\n"
-        f"name: {goods.name}\n"
-        f"type: {goods.type}\n"
-        f"parent_id: {goods.parent_id}\n"
-        f"sku:  {goods.sku}\n"
+    result = fmt.pre(
+        fmt.quote(
+            f"Goods created\n\n"
+            f"id:           {goods.id}\n"
+            f"parent id:    {goods.parent_id}\n\n"
+            f"name:         {goods.name}\n"
+            f"type:         {'📁' if goods.type is GoodsType.FOLDER else '📦'}\n"
+            f"sku:          {goods.sku}\n"
+        )
     )
     data["result"] = result
 
@@ -120,7 +122,7 @@ add_goods_dialog = Dialog(
         goods_adding_process,
         Const("Input goods name:"),
         MessageInput(request_goods_name),
-        Row(Cancel(), Next(when=GOODS_NAME)),
+        Row(Cancel(Const("❌ Cancel")), Next(Const("➡ Next️"), when=GOODS_NAME)),
         getter=get_goods_data,
         state=states.goods_db.AddGoods.name,
         parse_mode="HTML",
@@ -134,11 +136,15 @@ add_goods_dialog = Dialog(
             item_id_getter=itemgetter(1),
             items=[
                 ("📁 Folder", GoodsType.FOLDER.value),
-                ("Goods", GoodsType.GOODS.value),
+                ("📦 Goods", GoodsType.GOODS.value),
             ],
             on_click=save_goods_type,
         ),
-        Row(Back(), Cancel(), Next(when=GOODS_TYPE)),
+        Row(
+            Back(Const("🔙 Back")),
+            Cancel(Const("❌ Cancel")),
+            Next(Const("➡ Next️"), when=GOODS_TYPE),
+        ),
         getter=get_goods_data,
         state=states.goods_db.AddGoods.type,
         parse_mode="HTML",
@@ -147,7 +153,11 @@ add_goods_dialog = Dialog(
         goods_adding_process,
         Const("Input SKU:"),
         MessageInput(request_goods_sku),
-        Row(Back(), Cancel(), Next(when=GOODS_SKU)),
+        Row(
+            Back(Const("🔙 Back")),
+            Cancel(Const("❌ Cancel")),
+            Next(Const("➡ Next️"), when=GOODS_SKU),
+        ),
         getter=get_goods_data,
         state=states.goods_db.AddGoods.sku,
         parse_mode="HTML",
@@ -162,14 +172,16 @@ add_goods_dialog = Dialog(
             items=YES_NO,
             on_click=add_goods_yes_no,
         ),
-        Row(Back(on_click=back_from_confirm), Cancel()),
+        Row(
+            Back(Const("🔙 Back"), on_click=back_from_confirm), Cancel(Const("❌ Cancel"))
+        ),
         getter=get_goods_data,
         state=states.goods_db.AddGoods.confirm,
         parse_mode="HTML",
     ),
     Window(
         Format("{result}"),
-        Cancel(Const("Close"), on_click=enable_send_mode),
+        Cancel(Const("❌ Close"), on_click=enable_send_mode),
         getter=[get_goods_data, result_getter],
         state=states.goods_db.AddGoods.result,
         parse_mode="HTML",

@@ -6,10 +6,19 @@ from aiogram.utils.text_decorations import html_decoration as fmt
 from aiogram_dialog import Dialog, DialogManager, Window
 from aiogram_dialog.manager.protocols import ManagedDialogAdapterProto
 from aiogram_dialog.widgets.input import MessageInput, TextInput
-from aiogram_dialog.widgets.kbd import Back, Button, Cancel, Row, ScrollingGroup, Select
+from aiogram_dialog.widgets.kbd import (
+    Back,
+    Button,
+    Cancel,
+    Next,
+    Row,
+    ScrollingGroup,
+    Select,
+)
 from aiogram_dialog.widgets.managed import ManagedWidgetAdapter
-from aiogram_dialog.widgets.text import Const, Format
+from aiogram_dialog.widgets.text import Const, Format, Multi
 
+from app.domain.goods.models.goods_type import GoodsType
 from app.domain.goods.usecases.goods import GoodsService
 from app.domain.market.usecases import MarketService
 from app.domain.order.dto import OrderCreate, OrderLineCreate
@@ -28,13 +37,12 @@ from app.tgbot.constants import (
 from app.tgbot.handlers.admin.goods.add import result_getter
 from app.tgbot.handlers.admin.goods.edit import (
     get_current_goods,
-    go_to_next_level,
     go_to_parent_folder,
     selected_goods_data,
 )
 from app.tgbot.handlers.admin.market.edit import save_selected_market_id
 from app.tgbot.handlers.admin.user.common import get_user_data
-from app.tgbot.handlers.dialogs.common import enable_send_mode
+from app.tgbot.handlers.dialogs.common import enable_send_mode, when_not
 
 
 async def get_active_goods(
@@ -44,6 +52,21 @@ async def get_active_goods(
     parent_id_as_uuid = UUID(str(parent_id)) if parent_id else None
     goods = await goods_service.get_goods_in_folder(parent_id_as_uuid, only_active=True)
     return {GOODS: goods}
+
+
+async def go_to_next_level(
+    query: CallbackQuery,
+    select: ManagedWidgetAdapter[Select],
+    manager: DialogManager,
+    item_id: str,
+):
+    goods_service: GoodsService = manager.data.get("goods_service")
+
+    if (await goods_service.get_goods_by_id(UUID(item_id))).type == GoodsType.GOODS:
+        manager.current_context().dialog_data[SELECTED_GOODS] = item_id
+        await manager.dialog().next()
+    else:
+        manager.current_context().dialog_data[SELECTED_GOODS] = item_id
 
 
 async def save_quantity(
@@ -84,19 +107,18 @@ async def add_order_yes_no(
     new_order = await order_service.add_order(order)
 
     result = fmt.quote(
-        f"Order created\n"
-        f"id:           {new_order.id}\n"
-        f"creator:   {new_order.creator.name}\n"
-        f"market: {new_order.recipient_market}\n"
-        f"commentary:   {new_order.commentary}\n"
+        f"Order created\n\n"
+        f"id:       {str(new_order.id)}\n"
+        f"creator:  {new_order.creator.name}\n"
+        f"market:   {new_order.recipient_market.name}\n"
+        f"comments: {new_order.commentary}\n"
         f"goods:\n"
     )
     for line in new_order.order_lines:
         result += fmt.quote(
-            f"    name:           {line.goods.name}\n"
-            f"    quantity:     {line.quantity}\n"
+            f"  name:       {line.goods.name}\n" f"  quantity:   {line.quantity}\n\n"
         )
-    data["result"] = result
+    data["result"] = fmt.pre(result)
 
     await manager.dialog().next()
     await query.answer()
@@ -119,6 +141,40 @@ async def save_commentary(
     await dialog.next()
 
 
+order_adding_process = Multi(
+    Format(f"<pre>Goods:    {{{SELECTED_GOODS}.name}}</pre>", when=SELECTED_GOODS),
+    Format(f"<pre>Goods:    ...</pre>", when=when_not(SELECTED_GOODS)),
+    Format(f"<pre>Quantity: {{{'quantity'}}}</pre>", when="quantity"),
+    Format(f"<pre>Quantity: ...</pre>", when=when_not("quantity")),
+    Format(f"<pre>Market:   {{{SELECTED_MARKET}.name}}</pre>", when=SELECTED_MARKET),
+    Format(f"<pre>Market:   ...</pre>", when=when_not(SELECTED_MARKET)),
+    Format(f"<pre>Comments: {{{'commentary'}}}</pre>\n", when="commentary"),
+    Format(f"<pre>Comments: ...</pre>\n", when=when_not("commentary")),
+)
+
+
+async def order_adding_process_getter(
+    dialog_manager: DialogManager,
+    market_service: MarketService,
+    goods_service: GoodsService,
+    **kwargs,
+):
+    data = dialog_manager.current_context().dialog_data
+    market_id = data.get(SELECTED_MARKET)
+    goods_id = data.get(SELECTED_GOODS)
+
+    market = (
+        await market_service.get_market_by_id(UUID(market_id)) if market_id else None
+    )
+    goods = await goods_service.get_goods_by_id(UUID(goods_id)) if goods_id else None
+    return {
+        SELECTED_GOODS: goods,
+        SELECTED_MARKET: market,
+        "quantity": data.get("quantity"),
+        "commentary": data.get("commentary"),
+    }
+
+
 add_order_dialog = Dialog(
     Window(
         Const("Select goods"),
@@ -134,12 +190,15 @@ add_order_dialog = Dialog(
             width=1,
             height=8,
         ),
-        Button(Const("Back"), id="go_to_parent_folder", on_click=go_to_parent_folder),
-        Cancel(),
+        Button(
+            Const("⬅️ Back"), id="go_to_parent_folder", on_click=go_to_parent_folder
+        ),
+        Cancel(Const("❌ Cancel")),
         getter=[get_active_goods, get_current_goods, selected_goods_data],
         state=states.add_order.AddOrder.select_goods,
     ),
     Window(
+        order_adding_process,
         Const("Input quantity"),
         TextInput(
             id="item_qt",
@@ -147,9 +206,15 @@ add_order_dialog = Dialog(
             on_error=lambda q, _, __: q.answer("Invalid quantity, use digits only"),
             on_success=save_quantity,
         ),
+        Row(
+            Back(Const("⬅️ Back")),
+            Next(Const("➡ Next️"), when="quantity"),
+        ),
+        getter=order_adding_process_getter,
         state=states.add_order.AddOrder.input_quantity,
     ),
     Window(
+        order_adding_process,
         Const("Select market:"),
         ScrollingGroup(
             Select(
@@ -163,16 +228,25 @@ add_order_dialog = Dialog(
             width=1,
             height=8,
         ),
-        Cancel(),
-        getter=get_active_markets,
+        Row(
+            Back(Const("⬅️ Back")),
+            Next(Const("➡ Next️"), when=SELECTED_MARKET),
+        ),
+        Cancel(Const("❌ Cancel")),
+        getter=[get_active_markets, order_adding_process_getter],
         state=states.add_order.AddOrder.select_market,
     ),
     Window(
+        order_adding_process,
         Const("Input commentary"),
         MessageInput(save_commentary),
+        Back(Const("⬅️ Back")),
+        Next(Const("➡ Next️"), when="commentary"),
+        getter=order_adding_process_getter,
         state=states.add_order.AddOrder.input_comment,
     ),
     Window(
+        order_adding_process,
         Const("Confirm"),
         Select(
             Format("{item[0]}"),
@@ -181,14 +255,14 @@ add_order_dialog = Dialog(
             items=YES_NO,
             on_click=add_order_yes_no,
         ),
-        Row(Back(), Cancel()),
-        getter=get_user_data,
+        Row(Back(Const("⬅️ Back")), Cancel(Const("❌ Cancel"))),
+        getter=[get_user_data, order_adding_process_getter],
         state=states.add_order.AddOrder.confirm,
         parse_mode="HTML",
     ),
     Window(
         Format("{result}"),
-        Cancel(Const("Close"), on_click=enable_send_mode),
+        Cancel(Const("❌ Close"), on_click=enable_send_mode),
         getter=[result_getter],
         state=states.add_order.AddOrder.result,
         parse_mode="HTML",

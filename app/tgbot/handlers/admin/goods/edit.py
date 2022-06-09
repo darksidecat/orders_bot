@@ -3,10 +3,11 @@ from operator import attrgetter
 from uuid import UUID
 
 from aiogram.types import CallbackQuery, Message
+from aiogram.utils.text_decorations import html_decoration as fmt
 from aiogram_dialog import Dialog, DialogManager, Window
 from aiogram_dialog.manager.protocols import ManagedDialogAdapterProto
 from aiogram_dialog.widgets.input import MessageInput
-from aiogram_dialog.widgets.kbd import Back, Button, Cancel, Row, ScrollingGroup, Select
+from aiogram_dialog.widgets.kbd import Button, Cancel, Row, ScrollingGroup, Select
 from aiogram_dialog.widgets.managed import ManagedWidgetAdapter
 from aiogram_dialog.widgets.text import Const, Format
 
@@ -22,6 +23,7 @@ from app.domain.goods.usecases.goods import GoodsService
 from app.tgbot import states
 from app.tgbot.constants import GOODS, SELECTED_GOODS, SELECTOR_GOODS_ID
 from app.tgbot.handlers.admin.user.common import copy_start_data_to_context
+from app.tgbot.handlers.dialogs.common import when_not
 
 ROOT_GOODS = Goods(
     parent_id=None, name="Root", type=GoodsType.FOLDER, is_active=True, id=uuid.uuid4()
@@ -36,10 +38,13 @@ async def go_to_next_level(
 ):
     goods_service: GoodsService = manager.data.get("goods_service")
 
-    manager.current_context().dialog_data[SELECTED_GOODS] = item_id
     if (await goods_service.get_goods_by_id(UUID(item_id))).type == GoodsType.GOODS:
-        await manager.dialog().next()
-    await manager.dialog().show()
+        await manager.start(
+            states.goods_db.EditSelectedGoods.select_action,
+            data={SELECTED_GOODS: item_id},
+        )
+    else:
+        manager.current_context().dialog_data[SELECTED_GOODS] = item_id
 
 
 async def get_goods(
@@ -64,17 +69,20 @@ async def get_current_goods(
         current_goods = await goods_service.get_goods_by_id(goods_id_as_uuid)
     data = (
         f"""
-Selected now
+Selected goods:
+
 ID: {current_goods.id}
+Parent ID: {current_goods.parent_id}
+
 Name: {current_goods.name}
 SKU: {current_goods.sku}
-Type: {current_goods.type}
-Active: {current_goods.is_active}
-Parent ID: {current_goods.parent_id}
+Type: {current_goods.icon}
+Active: {"✅" if current_goods.is_active else "❌"}
 """
         if current_goods
         else ""
     )
+    data = fmt.pre(data)
     goods_data = {"current_goods_data": data}
     if current_goods and current_goods.type == GoodsType.GOODS:
         goods_data["is_not_folder"] = True
@@ -99,7 +107,11 @@ async def add_new_goods(
 async def edit_this_folder(
     query: CallbackQuery, button: Button, manager: DialogManager, **kwargs
 ):
-    await manager.switch_to(states.goods_db.EditGoods.select_action)
+    selected_folder = manager.current_context().dialog_data.get(SELECTED_GOODS)
+    await manager.start(
+        states.goods_db.EditSelectedGoods.select_action,
+        data={SELECTED_GOODS: selected_folder},
+    )
 
 
 async def change_active_status(
@@ -149,7 +161,6 @@ async def go_to_parent_folder(
         str(goods.parent_id) if goods.parent_id else None
     )
     await manager.dialog().show()
-    await manager.dialog().switch_to(states.goods_db.EditGoods.select_goods)
 
 
 async def edit_field_dialog_start(
@@ -203,38 +214,7 @@ goods_sku_dialog = Dialog(
 )
 
 
-edit_goods_dialog = Dialog(
-    Window(
-        Const("Select goods for editing:"),
-        Format("{current_goods_data}"),
-        ScrollingGroup(
-            Select(
-                Format("{item.icon} {item.name} {item.sku_text} {item.active_icon}"),
-                id=SELECTOR_GOODS_ID,
-                item_id_getter=attrgetter("id"),
-                items=GOODS,
-                on_click=go_to_next_level,
-            ),
-            id="goods_scrolling",
-            width=1,
-            height=8,
-        ),
-        Button(
-            Const("Edit this Folder"),
-            id="edit_folder",
-            on_click=edit_this_folder,
-            when=SELECTED_GOODS,
-        ),
-        Row(
-            Button(Const("Add new"), on_click=add_new_goods, id="add_new_goods"),
-            Button(
-                Const("Back"), id="go_to_parent_folder", on_click=go_to_parent_folder
-            ),
-        ),
-        Cancel(),
-        getter=[get_goods, get_current_goods, selected_goods_data],
-        state=states.goods_db.EditGoods.select_goods,
-    ),
+selected_goods_dialog = Dialog(
     Window(
         Format("{current_goods_data}"),
         Const("Select option"),
@@ -255,13 +235,47 @@ edit_goods_dialog = Dialog(
                 on_click=change_active_status,
                 id="mark_inactive",
             ),
-            Button(Const("Delete"), on_click=delete_goods, id="delete_goods"),
+            Button(Const("🗑️ Delete"), on_click=delete_goods, id="delete_goods"),
         ),
-        Row(
-            Back(),
-            Cancel(),
-        ),
+        Cancel(),
         getter=get_current_goods,
-        state=states.goods_db.EditGoods.select_action,
+        state=states.goods_db.EditSelectedGoods.select_action,
+    ),
+    on_start=copy_start_data_to_context,
+)
+
+
+edit_goods_dialog = Dialog(
+    Window(
+        Const("Select goods for editing:"),
+        Format("{current_goods_data}"),
+        ScrollingGroup(
+            Select(
+                Format("{item.icon} {item.name} {item.sku_text} {item.active_icon}"),
+                id=SELECTOR_GOODS_ID,
+                item_id_getter=attrgetter("id"),
+                items=GOODS,
+                on_click=go_to_next_level,
+            ),
+            id="goods_scrolling",
+            width=1,
+            height=8,
+        ),
+        Button(Const("➕ Add new"), on_click=add_new_goods, id="add_new_goods"),
+        Button(
+            Const("⚙️ Edit this Folder"),
+            id="edit_folder",
+            on_click=edit_this_folder,
+            when=when_not("is_not_folder"),
+        ),
+        Button(
+            Const("🔙 Back"),
+            id="go_to_parent_folder",
+            on_click=go_to_parent_folder,
+            when=SELECTED_GOODS,
+        ),
+        Cancel(Const("❌ Close")),
+        getter=[get_goods, get_current_goods, selected_goods_data],
+        state=states.goods_db.EditGoods.select_goods,
     ),
 )

@@ -53,8 +53,8 @@ async def add_market_yes_no(
 
     market = await market_service.add_market(market)
 
-    result = fmt.quote(
-        f"Market created\n" f"id:   {market.id}\n" f"name: {market.name}\n"
+    result = fmt.pre(
+        fmt.quote(f"Market created\n\n" f"id:   {market.id}\n" f"name: {market.name}\n")
     )
     data["result"] = result
 
@@ -69,12 +69,13 @@ add_market_dialog = Dialog(
     Window(
         Const("Input market name:"),
         MessageInput(request_market_name),
-        Row(Cancel(), Next(when=MARKET_NAME)),
+        Row(Cancel(Const("❌ Cancel")), Next(Const("➡ Next️"), when=MARKET_NAME)),
         state=states.market_db.AddMarket.name,
+        getter=get_market_data,
         parse_mode="HTML",
     ),
     Window(
-        Format(f"Market name: {{{MARKET_NAME}}}"),
+        Format(f"Market name: {{{MARKET_NAME}}}\n"),
         Const("Confirm ?"),
         Select(
             Format("{item[0]}"),
@@ -83,14 +84,14 @@ add_market_dialog = Dialog(
             items=YES_NO,
             on_click=add_market_yes_no,
         ),
-        Row(Back(), Cancel()),
+        Row(Back(Const("🔙 Back")), Cancel(Const("❌ Cancel"))),
         getter=get_market_data,
         state=states.market_db.AddMarket.confirm,
         parse_mode="HTML",
     ),
     Window(
         Format("{result}"),
-        Cancel(Const("Close"), on_click=enable_send_mode),
+        Cancel(Const("❌ Close"), on_click=enable_send_mode),
         getter=result_getter,
         state=states.market_db.AddMarket.result,
         parse_mode="HTML",

@@ -1,17 +1,13 @@
 from aiogram.types import CallbackQuery
+from aiogram.utils.text_decorations import html_decoration as fmt
 from aiogram_dialog import DialogManager
 from aiogram_dialog.widgets.kbd import Multiselect, Select
 from aiogram_dialog.widgets.managed import ManagedWidgetAdapter
 from aiogram_dialog.widgets.text import Format, Multi
 
-from app.domain.access_levels.interfaces.uow import IAccessLevelUoW
-from app.domain.access_levels.usecases.access_levels import (
-    AccessLevelsService,
-    GetAccessLevels,
-)
+from app.domain.access_levels.usecases.access_levels import AccessLevelsService
 from app.domain.user.exceptions.user import UserNotExists
-from app.domain.user.interfaces.uow import IUserUoW
-from app.domain.user.usecases.user import GetUser, GetUsers, UserService
+from app.domain.user.usecases.user import UserService
 from app.tgbot.constants import ACCESS_LEVELS, USER, USER_ID, USER_NAME, USERS
 from app.tgbot.handlers.dialogs.common import when_not
 
@@ -66,7 +62,9 @@ async def get_user_data(
 
     return {
         USER_ID: dialog_data.get(USER_ID),
-        USER_NAME: dialog_data.get(USER_NAME),
+        USER_NAME: fmt.quote(dialog_data.get(USER_NAME))
+        if dialog_data.get(USER_NAME)
+        else None,
         ACCESS_LEVELS: ", ".join((level.name.name for level in levels)),
     }
 

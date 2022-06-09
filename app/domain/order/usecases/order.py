@@ -6,7 +6,8 @@ from app.domain.common.events.dispatcher import EventDispatcher
 from app.domain.common.exceptions.base import AccessDenied
 from app.domain.order import dto
 from app.domain.order.interfaces.uow import IOrderUoW
-from app.domain.order.models.order import ConfirmedStatus, Order
+from app.domain.order.models.confirmed_status import ConfirmedStatus
+from app.domain.order.models.order import Order
 from app.domain.user.access_policy import AccessPolicy
 from app.domain.user.dto import User
 
@@ -44,7 +45,7 @@ class ChangeConfirmStatus(OrderUseCase):
         elif confirmed:
             order.change_confirm_status(ConfirmedStatus.YES, confirmed_by=confirmed_by)
         else:
-            order.change_confirm_status(ConfirmedStatus.NON, confirmed_by=confirmed_by)
+            order.change_confirm_status(ConfirmedStatus.NO, confirmed_by=confirmed_by)
 
         await self.event_dispatcher.publish_events(order.events)
         await self.uow.order.edit_order(order)

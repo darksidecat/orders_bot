@@ -7,14 +7,14 @@ from app.tgbot.states.market_db import EditMarket
 
 market_menu_dialog = Dialog(
     Window(
-        Const("Market\n\n Select action"),
+        Const("Market\n\nSelect action"),
         Start(
-            Const("Add/Edit"),
+            Const("⚙️ Add/Edit"),
             id="edit_market",
             state=EditMarket.select_market,
             mode=StartMode.NORMAL,
         ),
-        Cancel(),
+        Cancel(Const("❌ Close")),
         state=MarketCategory.action,
     ),
 )

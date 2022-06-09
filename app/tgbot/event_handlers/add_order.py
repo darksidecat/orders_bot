@@ -3,6 +3,7 @@ from typing import Any
 
 from aiogram import Bot
 from aiogram.exceptions import TelegramAPIError
+from aiogram.utils.text_decorations import html_decoration as fmt
 
 from app.domain.common.events.dispatcher import EventDispatcher
 from app.domain.order.models.order import OrderConfirmStatusChanged, OrderCreated
@@ -20,16 +21,17 @@ async def order_created_handler(event: OrderCreated, data: dict[str, Any]):
     users: list[User] = await user_service.get_users_for_confirmation()
 
     message = (
-        f"New order from {event.order.creator.name}\n"
-        f" Order id: {event.order.id}\n"
-        f" Order market: {event.order.recipient_market.name}\n"
-        f" Order comment: {event.order.commentary}\n"
+        f"New order from {event.order.creator.name}\n\n"
+        f"Order id:     {event.order.id}\n"
+        f"Order market: {event.order.recipient_market.name}\n"
+        f"Order comment:{event.order.commentary}\n\n"
     )
     for order_line in event.order.order_lines:
         message += (
-            f"\nGoods:\n {order_line.goods.name}\n"
-            f" Quantity: {order_line.quantity}\n"
+            f"  Goods:      {order_line.goods.name}\n"
+            f"  Quantity:   {order_line.quantity}\n"
         )
+    message = fmt.pre(message)
 
     for user in users:
         try:
@@ -48,7 +50,7 @@ async def order_confirm_handler(event: OrderConfirmStatusChanged, data: dict[str
 
     await bot.send_message(
         chat_id=event.order.creator.id,
-        text=f"Order {event.order.id} confirmed by {event.user.name}",
+        text=f"Order {event.order.id} confirmed by {event.user.name}. Status: {event.order.confirmed.value}",
     )
 
 

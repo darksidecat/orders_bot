@@ -11,8 +11,10 @@ class AddGoods(StatesGroup):
 
 class EditGoods(StatesGroup):
     select_goods = State()
+
+
+class EditSelectedGoods(StatesGroup):
     select_action = State()
-    result = State()
 
 
 class EditGoodsName(StatesGroup):

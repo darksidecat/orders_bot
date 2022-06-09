@@ -7,14 +7,14 @@ from app.tgbot.states.goods_db import EditGoods
 
 goods_menu_dialog = Dialog(
     Window(
-        Const("Goods\n\n Select action"),
+        Const("Goods\n\nSelect action"),
         Start(
-            Const("Add/Edit"),
+            Const("⚙️ Add/Edit"),
             id="edit_goods",
             state=EditGoods.select_goods,
             mode=StartMode.NORMAL,
         ),
-        Cancel(),
+        Cancel(Const("❌ Close")),
         state=GoodsCategory.action,
     ),
 )

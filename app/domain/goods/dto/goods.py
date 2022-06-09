@@ -29,7 +29,7 @@ class Goods(DTO):
 
     @property
     def icon(self):
-        return "" if self.type is GoodsType.GOODS else "📁"
+        return "📦" if self.type is GoodsType.GOODS else "📁"
 
     @property
     def active_icon(self):

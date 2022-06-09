@@ -8,12 +8,8 @@ from sqlalchemy.orm import relationship
 
 from app.domain.goods.models.goods import Goods
 from app.domain.market.models.market import Market
-from app.domain.order.models.order import (
-    ConfirmedStatus,
-    Order,
-    OrderLine,
-    OrderMessage,
-)
+from app.domain.order.models.confirmed_status import ConfirmedStatus
+from app.domain.order.models.order import Order, OrderLine, OrderMessage
 from app.domain.user.models.user import TelegramUser
 
 from .base import mapper_registry

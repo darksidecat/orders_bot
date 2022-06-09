@@ -1,6 +1,7 @@
 from operator import attrgetter, itemgetter
 
 from aiogram.types import CallbackQuery
+from aiogram.utils.text_decorations import html_decoration as fmt
 from aiogram_dialog import Dialog, DialogManager, Window
 from aiogram_dialog.widgets.kbd import Back, Cancel, Next, Row, ScrollingGroup, Select
 from aiogram_dialog.widgets.managed import ManagedWidgetAdapter
@@ -35,7 +36,7 @@ async def delete_user_yes_no(
         )
         await manager.dialog().back()
         return
-    data["result"] = f"User {data[USER_ID]} deleted"
+    data["result"] = fmt.pre(f"User {data[USER_ID]} deleted")
     await manager.dialog().next()
 
     await query.answer()
@@ -56,13 +57,13 @@ delete_user_dialog = Dialog(
             width=1,
             height=5,
         ),
-        Cancel(),
+        Cancel(Const("❌ Cancel")),
         getter=get_users,
         state=states.user_db.DeleteUser.select_user,
         preview_add_transitions=[Next()],
     ),
     Window(
-        Format("User:\n\n  id: {user.id}\n  name:   {user.name}\n\nDelete?"),
+        Format(fmt.pre("User:\n\nid:  {user.id}\nname:  {user.name}\n\nDelete?")),
         Select(
             Format("{item[0]}"),
             id="delete_yes_no",
@@ -70,14 +71,14 @@ delete_user_dialog = Dialog(
             items=YES_NO,
             on_click=delete_user_yes_no,
         ),
-        Row(Back(), Cancel()),
+        Row(Back(Const("⬅️ Back")), Cancel(Const("❌ Cancel"))),
         getter=get_user,
         state=states.user_db.DeleteUser.confirm,
         preview_add_transitions=[Next()],
     ),
     Window(
         Format("{result}"),
-        Cancel(Const("Close"), on_click=enable_send_mode),
+        Cancel(Const("❌ Close"), on_click=enable_send_mode),
         getter=get_result,
         state=states.user_db.DeleteUser.result,
         parse_mode="HTML",
