@@ -1,6 +1,6 @@
 from sqlalchemy import BOOLEAN, TEXT, Column
 from sqlalchemy import Enum as SQLEnum
-from sqlalchemy import ForeignKey, Table, func
+from sqlalchemy import ForeignKey, Table, UniqueConstraint, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
@@ -28,6 +28,7 @@ goods_table = Table(
     ),
     Column("sku", TEXT, nullable=True),
     Column("is_active", BOOLEAN, nullable=False, default=True),
+    UniqueConstraint("id", "type", name="uq_goods_id_type"),
 )
 
 

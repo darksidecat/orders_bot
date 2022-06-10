@@ -1,12 +1,13 @@
 from __future__ import annotations
 
-from sqlalchemy import BIGINT, INT, TEXT, Column, DateTime
+from sqlalchemy import BIGINT, INT, TEXT, CheckConstraint, Column, DateTime
 from sqlalchemy import Enum as SQLEnum
-from sqlalchemy import ForeignKey, Table, func
+from sqlalchemy import ForeignKey, ForeignKeyConstraint, Table, and_, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
 from app.domain.goods.models.goods import Goods
+from app.domain.goods.models.goods_type import GoodsType
 from app.domain.market.models.market import Market
 from app.domain.order.models.confirmed_status import ConfirmedStatus
 from app.domain.order.models.order import Order, OrderLine, OrderMessage
@@ -32,10 +33,22 @@ order_line_table = Table(
     Column(
         "goods_id",
         UUID(as_uuid=True),
-        ForeignKey("goods.id", ondelete="RESTRICT", onupdate="CASCADE"),
+        nullable=False,
+    ),
+    Column(
+        "goods_type",
+        SQLEnum(GoodsType),
         nullable=False,
     ),
     Column("quantity", BIGINT, nullable=False),
+    ForeignKeyConstraint(
+        ["goods_id", "goods_type"],
+        ["goods.id", "goods.type"],
+        name="fk_order_line_goods",
+        ondelete="RESTRICT",
+        onupdate="CASCADE",
+    ),
+    CheckConstraint("goods_type in ('GOODS')"),
 )
 
 order_table = Table(

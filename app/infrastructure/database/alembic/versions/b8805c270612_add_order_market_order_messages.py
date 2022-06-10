@@ -1,8 +1,8 @@
 """add order, market, order_messages
 
-Revision ID: 49c3975e57e6
+Revision ID: b8805c270612
 Revises: 65ee8401cea8
-Create Date: 2022-06-07 13:54:31.597940
+Create Date: 2022-06-10 20:59:57.930454
 
 """
 import sqlalchemy as sa
@@ -10,7 +10,7 @@ from alembic import op
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision = "49c3975e57e6"
+revision = "b8805c270612"
 down_revision = "65ee8401cea8"
 branch_labels = None
 depends_on = None
@@ -35,6 +35,7 @@ def upgrade():
             ["parent_id"], ["goods.id"], onupdate="CASCADE", ondelete="RESTRICT"
         ),
         sa.PrimaryKeyConstraint("id"),
+        sa.UniqueConstraint("id", "type", name="uq_goods_id_type"),
     )
     op.create_table(
         "market",
@@ -91,9 +92,17 @@ def upgrade():
         ),
         sa.Column("order_id", postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column("goods_id", postgresql.UUID(as_uuid=True), nullable=False),
+        sa.Column(
+            "goods_type", sa.Enum("GOODS", "FOLDER", name="goodstype"), nullable=False
+        ),
         sa.Column("quantity", sa.BIGINT(), nullable=False),
+        sa.CheckConstraint("goods_type in ('GOODS')"),
         sa.ForeignKeyConstraint(
-            ["goods_id"], ["goods.id"], onupdate="CASCADE", ondelete="RESTRICT"
+            ["goods_id", "goods_type"],
+            ["goods.id", "goods.type"],
+            name="fk_order_line_goods",
+            onupdate="CASCADE",
+            ondelete="RESTRICT",
         ),
         sa.ForeignKeyConstraint(
             ["order_id"], ["order.id"], onupdate="CASCADE", ondelete="CASCADE"

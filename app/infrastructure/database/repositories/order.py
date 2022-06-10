@@ -1,10 +1,18 @@
 from typing import List
 from uuid import UUID
 
+from asyncpg import CheckViolationError
 from sqlalchemy import insert
+from sqlalchemy.exc import IntegrityError
 
+from app.domain.goods.exceptions.goods import GoodsNotExists
+from app.domain.goods.models.goods import Goods
+from app.domain.goods.models.goods_type import GoodsType
 from app.domain.order import dto
-from app.domain.order.exceptions.order import OrderNotExists
+from app.domain.order.exceptions.order import (
+    OrderLineGoodsHasIncorrectType,
+    OrderNotExists,
+)
 from app.domain.order.interfaces.persistence import IOrderReader, IOrderRepo
 from app.domain.order.models.order import Order, OrderLine
 from app.infrastructure.database.repositories.repo import SQLAlchemyRepo
@@ -42,8 +50,19 @@ class OrderRepo(SQLAlchemyRepo, IOrderRepo):
                 order_id=new_order_id,
                 goods_id=line.goods_id,
                 quantity=line.quantity,
+                goods_type=line.goods_type,
             )
-            await self.session.execute(query)
+            try:
+                await self.session.execute(query)
+            except IntegrityError as err:
+                await self.session.rollback()
+                goods = await self.session.get(Goods, line.goods_id)
+                if not goods:
+                    raise GoodsNotExists(f"Goods with id {line.goods_id} not exists")
+                else:
+                    raise OrderLineGoodsHasIncorrectType(
+                        f"Goods with id {line.goods_id} is {goods.type} type, not GoodsType.GOODS"
+                    )
 
         new_order: Order = await self.session.get(Order, new_order_id)
 

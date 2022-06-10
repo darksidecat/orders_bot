@@ -1,5 +1,5 @@
 from aiogram import F
-from aiogram_dialog import Dialog, Window, DialogManager
+from aiogram_dialog import Dialog, DialogManager, Window
 from aiogram_dialog.widgets.kbd import Start
 from aiogram_dialog.widgets.text import Const
 
@@ -7,9 +7,7 @@ from app.domain.user.dto import User
 from app.tgbot.states import add_order, admin_menu, main_menu
 
 
-async def get_user(
-    dialog_manager: DialogManager, user: User, **kwargs
-):
+async def get_user(dialog_manager: DialogManager, user: User, **kwargs):
     return {"user": user}
 
 

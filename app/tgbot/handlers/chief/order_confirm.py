@@ -24,13 +24,13 @@ def confirm_order_keyboard(order_id: UUID):
         inline_keyboard=[
             [
                 InlineKeyboardButton(
-                    text="Confirm",
+                    text="✅ Confirm",
                     callback_data=OrderConfirm(order_id=order_id, result=True).pack(),
                 )
             ],
             [
                 InlineKeyboardButton(
-                    text="Cancel",
+                    text="❌ Cancel",
                     callback_data=OrderConfirm(order_id=order_id, result=False).pack(),
                 )
             ],

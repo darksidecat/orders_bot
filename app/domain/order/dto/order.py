@@ -5,6 +5,7 @@ from uuid import UUID
 
 from app.domain.common.dto.base import DTO
 from app.domain.goods.dto import Goods
+from app.domain.goods.models.goods_type import GoodsType
 from app.domain.market.dto import Market
 from app.domain.order.models.confirmed_status import ConfirmedStatus
 from app.domain.user.dto import User
@@ -12,6 +13,7 @@ from app.domain.user.dto import User
 
 class OrderLineCreate(DTO):
     goods_id: UUID
+    goods_type: GoodsType = GoodsType.GOODS
     quantity: int
 
 
