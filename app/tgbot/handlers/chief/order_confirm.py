@@ -52,6 +52,11 @@ async def confirm_order(
         )
     except OrderAlreadyConfirmed:
         await query.answer("Order already confirmed")
+        try:
+            await query.message.edit_reply_markup(reply_markup=None)
+        except TelegramAPIError:
+            #  If reply_markup is already deleted
+            pass
     if callback_data.result:
         await query.answer("Order confirmed")
     else:
