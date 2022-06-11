@@ -61,7 +61,7 @@ async def confirm_order(
         await query.answer("Order confirmed")
     else:
         await query.answer("Order canceled")
-    order = await order_service.get_order_by_id(callback_data.order_id, has_access=True)
+    order = await order_service.get_order_by_id(callback_data.order_id)
 
     for message in order.order_messages:
         try:

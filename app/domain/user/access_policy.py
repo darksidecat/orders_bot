@@ -1,5 +1,8 @@
 from asyncio import Protocol
+from typing import Optional
+from uuid import UUID
 
+from app.domain.order.dto import Order
 from app.domain.user.dto import User
 
 
@@ -28,7 +31,7 @@ class AccessPolicy(Protocol):
     def add_orders(self) -> bool:
         ...
 
-    def read_orders(self) -> bool:
+    def read_orders(self, order: Optional[Order], order_id: UUID) -> bool:
         ...
 
     def modify_orders(self) -> bool:
@@ -42,12 +45,10 @@ class AccessPolicy(Protocol):
 
 
 class AllowPolicy(AccessPolicy):
-    def allow(self):
+    def allow(self, *args, **kwargs):
         return True
 
-    def read_user_self(self, user_id: int):
-        return True
-
+    read_user_self = allow
     read_access_levels = allow
     read_users = allow
     modify_users = allow
@@ -82,9 +83,13 @@ class UserAccessPolicy(AccessPolicy):
     read_markets = _is_not_blocked
     modify_markets = _is_admin
 
-    read_orders = _is_admin
     modify_orders = _is_admin
     add_orders = _is_not_blocked
+
+    def read_orders(self, order: Optional[Order], order_id: UUID) -> bool:
+        if self.user.is_admin or self.user.can_confirm_order or not order:
+            return True
+        return order.creator.id == self.user.id
 
     def read_user_self(self, user_id: int):
         return self.user.id == user_id
