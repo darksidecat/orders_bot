@@ -94,7 +94,7 @@ async def on_field_selected(
     column_states = {
         TelegramUser.id.name: states.user_db.EditUserId.request,
         TelegramUser.name.name: states.user_db.EditUserName.request,
-        TelegramUser.access_levels.key: states.user_db.EditAccessLevel.request,
+        "access levels": states.user_db.EditAccessLevel.request,
     }
 
     await manager.start(
@@ -114,7 +114,7 @@ async def get_user_edit_data(
 
     user = await user_service.get_user(int(user_id))
     fields = TelegramUser.__table__.columns.keys()
-    fields.append(TelegramUser.access_levels.key)
+    fields.append("access levels")
     fields = [(f, f) for f in fields]
 
     dialog_manager.current_context().dialog_data[USER] = user.json()

@@ -46,4 +46,4 @@ tests:
 
 .PHONY: prod
 prod:
-	docker compose -f=./deployment/docker-compose.yml --env-file=./deployment/.env.dev up
+	docker compose -f=docker-compose.yml --env-file=.env.dev up

@@ -19,7 +19,7 @@ class AccessLevelReader(SQLAlchemyRepo, IAccessLevelReader):
         result = await self.session.execute(query)
         access_levels = result.scalars().all()
 
-        return parse_obj_as(List[dto.AccessLevel], access_levels)
+        return parse_obj_as(List[dto.AccessLevel], list(access_levels))
 
     @exception_mapper
     async def user_access_levels(self, user_id: int) -> List[dto.AccessLevel]:
@@ -28,4 +28,5 @@ class AccessLevelReader(SQLAlchemyRepo, IAccessLevelReader):
         if not user:
             raise UserNotExists
 
-        return parse_obj_as(List[dto.AccessLevel], user.access_levels)
+        print(type(user.access_levels))
+        return parse_obj_as(List[dto.AccessLevel], list(user.access_levels))

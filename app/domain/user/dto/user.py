@@ -1,6 +1,8 @@
 from __future__ import annotations
 
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Iterable
+
+from pydantic import validator
 
 from app.domain.access_levels.dto.access_level import AccessLevel
 from app.domain.access_levels.models.helper import Levels
@@ -31,6 +33,10 @@ class BaseUser(DTO):
 
 class User(BaseUser):
     access_levels: Tuple[AccessLevel, ...]
+
+    @validator("access_levels", pre=True)
+    def validate_access_levels(cls, v: Iterable[AccessLevel]) -> Tuple[AccessLevel, ...]:
+        return tuple(v)
 
     @property
     def is_blocked(self) -> bool:

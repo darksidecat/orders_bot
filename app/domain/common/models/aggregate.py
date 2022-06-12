@@ -12,9 +12,4 @@ class Aggregate:
 
     @property
     def events(self):
-        # there is strange bug with attrs and sqlalchemy
-        # after loading from db, aggregate._events is not present as attribute,
-        # so we need to create it manually
-        if not hasattr(self, "_events"):
-            self._events = []
         return self._events
