@@ -27,3 +27,15 @@ class CantSetFolderSKU(GoodsException):
 
 class CantMakeActiveWithInactiveParent(GoodsException):
     """Can't make active with inactive parent"""
+
+
+class GoodsTypeCantBeParent(GoodsException):
+    """Goods with GoodsType.Goods can't be parent"""
+
+
+class CantSetSKUForFolder(GoodsException):
+    """Can't set SKU for folder"""
+
+
+class GoodsMustHaveSKU(GoodsException):
+    """Goods must have SKU"""

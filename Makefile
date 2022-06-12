@@ -25,10 +25,6 @@ reformat:
 dev-docker:
 	docker compose -f=docker-compose-dev.yml --env-file=.env up
 
-.PHONY: test-docker
-test-docker:
-	docker compose -f=docker-compose-test.yml --env-file=.env.test up
-
 .PHONY: dev-alembic
 dev-alembic:
 	$(call setup_env, .env)
@@ -38,6 +34,10 @@ dev-alembic:
 dev-bot:
 	$(call setup_env, .env)
 	python -m app.tgbot
+
+.PHONY: test-docker
+test-docker:
+	docker compose -f=docker-compose-test.yml --env-file=.env.test up
 
 .PHONY: tests
 tests:

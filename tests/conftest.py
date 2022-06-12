@@ -68,7 +68,8 @@ async def db_session(session_factory, config) -> AsyncSession:
 
         yield session
         await session.close()
-        await transaction.rollback()
+        if transaction.is_active:
+            await transaction.rollback()
 
 
 async def wipe_db(session_factory, schema: str = "public") -> None:

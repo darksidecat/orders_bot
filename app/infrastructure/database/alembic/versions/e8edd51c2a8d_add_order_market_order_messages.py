@@ -1,8 +1,8 @@
 """add order, market, order_messages
 
-Revision ID: b8805c270612
+Revision ID: e8edd51c2a8d
 Revises: 65ee8401cea8
-Create Date: 2022-06-10 20:59:57.930454
+Create Date: 2022-06-13 01:34:43.044118
 
 """
 import sqlalchemy as sa
@@ -10,7 +10,7 @@ from alembic import op
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision = "b8805c270612"
+revision = "e8edd51c2a8d"
 down_revision = "65ee8401cea8"
 branch_labels = None
 depends_on = None
@@ -29,10 +29,26 @@ def upgrade():
         sa.Column("name", sa.TEXT(), nullable=False),
         sa.Column("type", sa.Enum("GOODS", "FOLDER", name="goodstype"), nullable=False),
         sa.Column("parent_id", postgresql.UUID(as_uuid=True), nullable=True),
+        sa.Column(
+            "parent_type", sa.Enum("GOODS", "FOLDER", name="goodstype"), nullable=True
+        ),
         sa.Column("sku", sa.TEXT(), nullable=True),
         sa.Column("is_active", sa.BOOLEAN(), nullable=False),
+        sa.CheckConstraint(
+            "(type in ('FOLDER') AND sku IS NULL) or type in ('GOODS')",
+            name="ck_folder_sku_null",
+        ),
+        sa.CheckConstraint(
+            "(type in ('GOODS') AND sku IS NOT NULL) or type in ('FOLDER')",
+            name="ck_goods_sku_not_null",
+        ),
+        sa.CheckConstraint("parent_type not in ('GOODS')"),
         sa.ForeignKeyConstraint(
-            ["parent_id"], ["goods.id"], onupdate="CASCADE", ondelete="RESTRICT"
+            ["parent_id", "parent_type"],
+            ["goods.id", "goods.type"],
+            name="fk_goods_goods",
+            onupdate="CASCADE",
+            ondelete="RESTRICT",
         ),
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("id", "type", name="uq_goods_id_type"),
@@ -61,9 +77,9 @@ def upgrade():
         sa.Column(
             "created_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False
         ),
-        sa.Column("recipient_market_id", postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column("confirmed_at", sa.DateTime(), nullable=True),
         sa.Column("updated_at", sa.DateTime(), nullable=True),
+        sa.Column("recipient_market_id", postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column("commentary", sa.TEXT(), nullable=False),
         sa.Column(
             "confirmed",

@@ -45,7 +45,8 @@ class Goods(Aggregate):
             sku=sku,
             is_active=is_active,
         )
-
+        if parent_id:
+            goods.parent_type = GoodsType.FOLDER
         goods.events.append(GoodsCreated(dto.Goods.from_orm(goods)))
 
         return goods

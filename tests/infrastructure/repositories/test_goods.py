@@ -1,3 +1,4 @@
+import asyncio
 from uuid import UUID
 
 import pytest
@@ -5,8 +6,11 @@ from sqlalchemy import func, select
 
 from app.domain.goods.exceptions.goods import (
     CantDeleteWithChildren,
+    CantSetSKUForFolder,
     GoodsAlreadyExists,
+    GoodsMustHaveSKU,
     GoodsNotExists,
+    GoodsTypeCantBeParent,
 )
 from app.domain.goods.models.goods import Goods
 from app.domain.goods.models.goods_type import GoodsType
@@ -88,6 +92,24 @@ class TestGoodsRepo:
         ).scalar()
         assert all_goods_count == 1
 
+    async def test_add_goods_with_goods_type_as_parent_exception(self, goods_repo):
+        goods_type = await goods_repo.add_goods(
+            Goods.create(name="GoodsType", type=GoodsType.GOODS, sku="123")
+        )
+        await goods_repo.session.commit()
+        with pytest.raises(GoodsTypeCantBeParent):
+            await goods_repo.add_goods(
+                Goods.create(
+                    name="GoodsName",
+                    type=GoodsType.GOODS,
+                    sku="123",
+                    parent_id=goods_type.id,
+                )
+            )
+            await goods_repo.session.commit()
+
+    # ignore identity key conflict
+    @pytest.mark.filterwarnings("ignore::sqlalchemy.exc.SAWarning")
     async def test_add_goods_exception(self, goods_repo):
         goods = await goods_repo.add_goods(
             Goods.create(name="GoodsName", type=GoodsType.GOODS, sku="123")
@@ -96,6 +118,20 @@ class TestGoodsRepo:
         with pytest.raises(GoodsAlreadyExists):
             await goods_repo.add_goods(
                 Goods(id=goods.id, name="GoodsName", type=GoodsType.GOODS, sku="123")
+            )
+            await goods_repo.session.commit()
+
+    async def test_add_goods_sku_exception(self, goods_repo):
+        with pytest.raises(GoodsMustHaveSKU):
+            await goods_repo.add_goods(
+                Goods.create(name="GoodsName", type=GoodsType.GOODS)
+            )
+            await goods_repo.session.commit()
+
+    async def test_add_goods_sku_exception_2(self, goods_repo):
+        with pytest.raises(CantSetSKUForFolder):
+            await goods_repo.add_goods(
+                Goods.create(name="GoodsName", type=GoodsType.FOLDER, sku="123")
             )
             await goods_repo.session.commit()
 
@@ -154,7 +190,7 @@ class TestGoodsRepo:
         folder = await goods_repo.add_goods(
             Goods.create(name="Folder", type=GoodsType.FOLDER)
         )
-        goods = await goods_repo.add_goods(
+        await goods_repo.add_goods(
             Goods.create(
                 name="Goods", type=GoodsType.GOODS, sku="123", parent_id=folder.id
             )

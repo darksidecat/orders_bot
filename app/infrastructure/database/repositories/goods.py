@@ -9,8 +9,11 @@ from sqlalchemy.exc import IntegrityError
 from app.domain.goods import dto
 from app.domain.goods.exceptions.goods import (
     CantDeleteWithChildren,
+    CantSetSKUForFolder,
     GoodsAlreadyExists,
+    GoodsMustHaveSKU,
     GoodsNotExists,
+    GoodsTypeCantBeParent,
 )
 from app.domain.goods.interfaces.persistence import IGoodsReader, IGoodsRepo
 from app.domain.goods.models.goods import Goods
@@ -64,8 +67,16 @@ class GoodsRepo(SQLAlchemyRepo, IGoodsRepo):
         try:
             self.session.add(goods)
             await self.session.flush()
-        except IntegrityError:
-            raise GoodsAlreadyExists
+        except IntegrityError as err:
+            if "goods_pkey" in str(err):
+                raise GoodsAlreadyExists
+            if "fk_goods_goods" in str(err):
+                raise GoodsTypeCantBeParent
+            if "ck_folder_sku_null" in str(err):
+                raise CantSetSKUForFolder()
+            if "ck_goods_sku_not_null" in str(err):
+                raise GoodsMustHaveSKU()
+            raise
 
         return goods
 

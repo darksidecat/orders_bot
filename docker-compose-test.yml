@@ -5,7 +5,9 @@ services:
         restart: "unless-stopped"
         environment:
             REDIS_HOST: ${REDIS__HOST}
-            VOLUMES_DIR: ${VOLUMES_DIR}
+            VOLUMES_DIR: ${TEST_VOLUMES_DIR}
+        volumes:
+            - "~/${TEST_VOLUMES_DIR}/redis-data:/data"
         ports:
             - "6379:6379"
     db:
@@ -15,6 +17,8 @@ services:
             POSTGRES_USER: ${DB__USER}
             POSTGRES_PASSWORD: ${DB__PASSWORD}
             POSTGRES_DB: ${DB__NAME}
-            VOLUMES_DIR: ${VOLUMES_DIR}
+            VOLUMES_DIR: ${TEST_VOLUMES_DIR}
+        volumes:
+            - "~/${TEST_VOLUMES_DIR}/pg-data:/var/lib/postgresql/data"
         ports:
             - "15432:5432"
