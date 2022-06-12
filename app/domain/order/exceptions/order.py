@@ -15,3 +15,7 @@ class OrderNotExists(OrderException):
 
 class OrderLineGoodsHasIncorrectType(OrderException):
     """Order line goods has incorrect type"""
+
+
+class OrderAlreadyExists(OrderException):
+    """Order already exists"""

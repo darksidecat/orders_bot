@@ -1,0 +1,20 @@
+version: '3.8'
+services:
+    redis:
+        image: redis:6-alpine
+        restart: "unless-stopped"
+        environment:
+            REDIS_HOST: ${REDIS__HOST}
+            VOLUMES_DIR: ${VOLUMES_DIR}
+        ports:
+            - "6379:6379"
+    db:
+        image: postgres:14-alpine
+        restart: "unless-stopped"
+        environment:
+            POSTGRES_USER: ${DB__USER}
+            POSTGRES_PASSWORD: ${DB__PASSWORD}
+            POSTGRES_DB: ${DB__NAME}
+            VOLUMES_DIR: ${VOLUMES_DIR}
+        ports:
+            - "15432:5432"

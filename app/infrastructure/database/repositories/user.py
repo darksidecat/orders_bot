@@ -3,12 +3,16 @@ from typing import List
 
 from pydantic import parse_obj_as
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 
 from app.domain.access_levels.exceptions.access_levels import AccessLevelNotExist
 from app.domain.access_levels.models.access_level import AccessLevel, LevelName
-from app.domain.access_levels.models.helper import Levels
 from app.domain.user import dto
-from app.domain.user.exceptions.user import UserNotExists
+from app.domain.user.exceptions.user import (
+    CantDeleteWithOrders,
+    UserAlreadyExists,
+    UserNotExists,
+)
 from app.domain.user.interfaces.persistence import IUserReader, IUserRepo
 from app.domain.user.models.user import TelegramUser
 from app.infrastructure.database.exception_mapper import exception_mapper
@@ -76,9 +80,12 @@ class UserRepo(SQLAlchemyRepo, IUserRepo):
 
     @exception_mapper
     async def add_user(self, user: TelegramUser) -> TelegramUser:
-        await self._populate_access_levels(user)
-        self.session.add(user)
-        await self.session.flush()
+        try:
+            await self._populate_access_levels(user)
+            self.session.add(user)
+            await self.session.flush()
+        except IntegrityError:
+            raise UserAlreadyExists
 
         return user
 
@@ -88,13 +95,19 @@ class UserRepo(SQLAlchemyRepo, IUserRepo):
 
     @exception_mapper
     async def delete_user(self, user_id: int) -> None:
-        user = await self._user(user_id)
-        await self.session.delete(user)
-        await self.session.flush()
+        try:
+            user = await self._user(user_id)
+            await self.session.delete(user)
+            await self.session.flush()
+        except IntegrityError:
+            raise CantDeleteWithOrders
 
     @exception_mapper
     async def edit_user(self, user: TelegramUser) -> TelegramUser:
-        await self._populate_access_levels(user)
-        await self.session.flush()
+        try:
+            await self._populate_access_levels(user)
+            await self.session.flush()
+        except IntegrityError:
+            raise UserAlreadyExists
 
         return user

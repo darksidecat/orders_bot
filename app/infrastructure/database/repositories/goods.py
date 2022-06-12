@@ -4,9 +4,14 @@ from uuid import UUID
 
 from pydantic import parse_obj_as
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 
 from app.domain.goods import dto
-from app.domain.goods.exceptions.goods import GoodsNotExists
+from app.domain.goods.exceptions.goods import (
+    CantDeleteWithChildren,
+    GoodsAlreadyExists,
+    GoodsNotExists,
+)
 from app.domain.goods.interfaces.persistence import IGoodsReader, IGoodsRepo
 from app.domain.goods.models.goods import Goods
 from app.infrastructure.database.exception_mapper import exception_mapper
@@ -56,8 +61,11 @@ class GoodsRepo(SQLAlchemyRepo, IGoodsRepo):
 
     @exception_mapper
     async def add_goods(self, goods: Goods) -> Goods:
-        self.session.add(goods)
-        await self.session.flush()
+        try:
+            self.session.add(goods)
+            await self.session.flush()
+        except IntegrityError:
+            raise GoodsAlreadyExists
 
         return goods
 
@@ -67,12 +75,18 @@ class GoodsRepo(SQLAlchemyRepo, IGoodsRepo):
 
     @exception_mapper
     async def delete_goods(self, goods_id: UUID) -> None:
-        goods = await self._goods(goods_id)
-        await self.session.delete(goods)
-        await self.session.flush()
+        try:
+            goods = await self._goods(goods_id)
+            await self.session.delete(goods)
+            await self.session.flush()
+        except IntegrityError:
+            raise CantDeleteWithChildren()
 
     @exception_mapper
     async def edit_goods(self, goods: Goods) -> Goods:
-        await self.session.flush()
+        try:
+            await self.session.flush()
+        except IntegrityError:
+            raise GoodsAlreadyExists
 
         return goods

@@ -67,12 +67,6 @@ order_table = Table(
         nullable=False,
     ),
     Column("created_at", DateTime, nullable=False, server_default=func.now()),
-    Column(
-        "recipient_market_id",
-        UUID(as_uuid=True),
-        ForeignKey("market.id", ondelete="RESTRICT", onupdate="CASCADE"),
-        nullable=False,
-    ),
     Column("confirmed_at", DateTime, nullable=True),
     Column("updated_at", DateTime, onupdate=func.now(), nullable=True),
     Column(

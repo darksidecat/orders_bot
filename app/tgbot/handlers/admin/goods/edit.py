@@ -1,10 +1,11 @@
 import uuid
 from operator import attrgetter
+from typing import Any
 from uuid import UUID
 
 from aiogram.types import CallbackQuery, Message
 from aiogram.utils.text_decorations import html_decoration as fmt
-from aiogram_dialog import Dialog, DialogManager, Window
+from aiogram_dialog import Data, Dialog, DialogManager, Window
 from aiogram_dialog.manager.protocols import ManagedDialogAdapterProto
 from aiogram_dialog.widgets.input import MessageInput
 from aiogram_dialog.widgets.kbd import Button, Cancel, Row, ScrollingGroup, Select
@@ -143,8 +144,7 @@ async def delete_goods(
         return
 
     await query.answer("Goods deleted")
-    manager.current_context().dialog_data[SELECTED_GOODS] = None
-    await manager.dialog().switch_to(states.goods_db.EditGoods.select_goods)
+    await manager.done({SELECTED_GOODS: None})
 
 
 async def go_to_parent_folder(
@@ -193,6 +193,11 @@ async def request_sku(
     selected_goods = UUID(manager.current_context().dialog_data.get(SELECTED_GOODS))
     await service.patch_goods(GoodsPatch(id=selected_goods, sku=message.text))
     await manager.done()
+
+
+async def process_result(start_data: Data, result: Any, manager: DialogManager):
+    if result:
+        manager.current_context().dialog_data[SELECTED_GOODS] = result[SELECTED_GOODS]
 
 
 goods_name_dialog = Dialog(
@@ -278,4 +283,5 @@ edit_goods_dialog = Dialog(
         getter=[get_goods, get_current_goods, selected_goods_data],
         state=states.goods_db.EditGoods.select_goods,
     ),
+    on_process_result=process_result,
 )

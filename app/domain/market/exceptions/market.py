@@ -11,3 +11,7 @@ class MarketNotExists(MarketException):
 
 class CantDeleteWithOrders(MarketException):
     """Can't delete market with orders"""
+
+
+class MarketAlreadyExists(MarketException):
+    """Market already exists"""

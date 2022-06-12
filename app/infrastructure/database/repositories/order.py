@@ -54,7 +54,7 @@ class OrderRepo(SQLAlchemyRepo, IOrderRepo):
             )
             try:
                 await self.session.execute(query)
-            except IntegrityError as err:
+            except IntegrityError:
                 await self.session.rollback()
                 goods = await self.session.get(Goods, line.goods_id)
                 if not goods:
@@ -67,6 +67,7 @@ class OrderRepo(SQLAlchemyRepo, IOrderRepo):
         new_order: Order = await self.session.get(Order, new_order_id)
 
         new_order.create()
+        await self.session.flush()
         return new_order
 
     async def order_by_id(self, order_id: UUID) -> Order:
@@ -78,5 +79,9 @@ class OrderRepo(SQLAlchemyRepo, IOrderRepo):
         return order
 
     async def edit_order(self, order: Order) -> Order:
-        await self.session.flush()
+        try:
+            await self.session.flush()
+        except IntegrityError:
+            raise OrderAlreadyExists
+
         return order

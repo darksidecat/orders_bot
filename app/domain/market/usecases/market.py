@@ -5,9 +5,11 @@ from uuid import UUID
 
 from app.domain.common.events.dispatcher import EventDispatcher
 from app.domain.common.exceptions.base import AccessDenied
-from app.domain.common.exceptions.repo import IntegrityViolationError
 from app.domain.market import dto
-from app.domain.market.exceptions.market import CantDeleteWithOrders
+from app.domain.market.exceptions.market import (
+    CantDeleteWithOrders,
+    MarketAlreadyExists,
+)
 from app.domain.market.interfaces.uow import IMarketUoW
 from app.domain.market.models.market import Market
 from app.domain.user.access_policy import AccessPolicy
@@ -38,13 +40,18 @@ class AddMarket(MarketUseCase):
 
         market = Market.create(name=market.name)
 
-        market = await self.uow.market.add_market(market)
-        await self.event_dispatcher.publish_events(market.events)
-        await self.uow.commit()
-        await self.event_dispatcher.publish_notifications(market.events)
-        market.events.clear()
+        try:
+            market = await self.uow.market.add_market(market)
+            await self.event_dispatcher.publish_events(market.events)
+            await self.uow.commit()
+            await self.event_dispatcher.publish_notifications(market.events)
+            market.events.clear()
 
-        logger.info("Market persisted: id=%s, %s", market.id, market)
+            logger.info("Market persisted: id=%s, %s", market.id, market)
+        except MarketAlreadyExists:
+            logger.info("Market already exists: %s", market)
+            await self.uow.rollback()
+            raise
 
         return dto.Market.from_orm(market)
 
@@ -64,9 +71,9 @@ class DeleteMarket(MarketUseCase):
         try:
             await self.uow.market.delete_market(market_id)
             await self.uow.commit()
-        except IntegrityViolationError:
+        except CantDeleteWithOrders:
             await self.uow.rollback()
-            raise CantDeleteWithOrders()
+            raise
 
 
 class MarketService:

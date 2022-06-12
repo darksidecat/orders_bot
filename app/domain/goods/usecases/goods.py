@@ -8,13 +8,13 @@ from pydantic import parse_obj_as
 from app.domain.common.dto.base import UNSET
 from app.domain.common.events.dispatcher import EventDispatcher
 from app.domain.common.exceptions.base import AccessDenied
-from app.domain.common.exceptions.repo import IntegrityViolationError
 from app.domain.goods import dto
 from app.domain.goods.exceptions.goods import (
     CantDeleteWithChildren,
     CantMakeActiveWithInactiveParent,
     CantMakeInactiveWithActiveChildren,
     CantSetFolderSKU,
+    GoodsAlreadyExists,
 )
 from app.domain.goods.interfaces.uow import IGoodsUoW
 from app.domain.goods.models.goods import Goods
@@ -45,14 +45,19 @@ class AddGoods(GoodsUseCase):
             name=goods.name, type=goods.type, parent_id=goods.parent_id, sku=goods.sku
         )
 
-        goods = await self.uow.goods.add_goods(goods=goods)
+        try:
+            goods = await self.uow.goods.add_goods(goods=goods)
 
-        await self.event_dispatcher.publish_events(goods.events)
-        await self.uow.commit()
-        await self.event_dispatcher.publish_notifications(goods.events)
-        goods.events.clear()
+            await self.event_dispatcher.publish_events(goods.events)
+            await self.uow.commit()
+            await self.event_dispatcher.publish_notifications(goods.events)
+            goods.events.clear()
 
-        logger.info("Goods persisted: id=%s, %s", goods.id, goods)
+            logger.info("Goods persisted: id=%s, %s", goods.id, goods)
+        except GoodsAlreadyExists:
+            logger.error("Goods already exists: %s", goods)
+            await self.uow.rollback()
+            raise
 
         return dto.Goods.from_orm(goods)
 
@@ -101,9 +106,9 @@ class DeleteGoods(GoodsUseCase):
     async def __call__(self, goods_id: Optional[UUID]) -> None:
         try:
             await self.uow.goods.delete_goods(goods_id)
-        except IntegrityViolationError:
+        except CantDeleteWithChildren:
             await self.uow.rollback()
-            raise CantDeleteWithChildren()
+            raise
         await self.uow.commit()
 
 

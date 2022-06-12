@@ -24,7 +24,9 @@ class Goods(Aggregate):
     parent_id: Optional[UUID] = attrs.field(
         validator=validators.instance_of(Optional[UUID]), default=None
     )
-    sku: Optional[str] = attrs.field(validator=validators.instance_of(Optional[str]))
+    sku: Optional[str] = attrs.field(
+        validator=validators.instance_of(Optional[str]), default=None
+    )
     is_active: bool = attrs.field(validator=validators.instance_of(bool), default=True)
 
     @classmethod

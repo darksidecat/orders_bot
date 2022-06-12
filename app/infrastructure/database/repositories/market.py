@@ -4,9 +4,14 @@ from uuid import UUID
 
 from pydantic import parse_obj_as
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 
 from app.domain.market import dto
-from app.domain.market.exceptions.market import MarketNotExists
+from app.domain.market.exceptions.market import (
+    CantDeleteWithOrders,
+    MarketAlreadyExists,
+    MarketNotExists,
+)
 from app.domain.market.interfaces.persistence import IMarketReader, IMarketRepo
 from app.domain.market.models.market import Market
 from app.infrastructure.database.exception_mapper import exception_mapper
@@ -50,8 +55,11 @@ class MarketRepo(SQLAlchemyRepo, IMarketRepo):
 
     @exception_mapper
     async def add_market(self, market: Market) -> Market:
-        self.session.add(market)
-        await self.session.flush()
+        try:
+            self.session.add(market)
+            await self.session.flush()
+        except IntegrityError:
+            raise MarketAlreadyExists
 
         return market
 
@@ -61,12 +69,18 @@ class MarketRepo(SQLAlchemyRepo, IMarketRepo):
 
     @exception_mapper
     async def delete_market(self, market_id: UUID) -> None:
-        market = await self._market(market_id)
-        await self.session.delete(market)
-        await self.session.flush()
+        try:
+            market = await self._market(market_id)
+            await self.session.delete(market)
+            await self.session.flush()
+        except IntegrityError:
+            raise CantDeleteWithOrders  # ToDo add check for market not exists
 
     @exception_mapper
     async def edit_market(self, market: Market) -> Market:
-        await self.session.flush()
+        try:
+            await self.session.flush()
+        except IntegrityError:
+            raise MarketAlreadyExists
 
         return market

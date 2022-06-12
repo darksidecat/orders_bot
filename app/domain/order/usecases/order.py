@@ -116,9 +116,13 @@ class OrderService:
 
     async def get_order_by_id(self, order_id: UUID) -> dto.Order:
         try:
-            order = await GetOrder(uow=self.uow, event_dispatcher=self.event_dispatcher)(order_id=order_id)
+            order = await GetOrder(
+                uow=self.uow, event_dispatcher=self.event_dispatcher
+            )(order_id=order_id)
         except OrderNotExists:
             order = None
         if not self.access_policy.read_orders(order=order, order_id=order_id):
             raise AccessDenied()
-        return await GetOrder(uow=self.uow, event_dispatcher=self.event_dispatcher)(order_id=order_id)
+        return await GetOrder(uow=self.uow, event_dispatcher=self.event_dispatcher)(
+            order_id=order_id
+        )

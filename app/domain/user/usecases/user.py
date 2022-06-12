@@ -5,7 +5,6 @@ from typing import List
 from app.domain.access_levels.models.helper import id_to_access_levels
 from app.domain.common.events.dispatcher import EventDispatcher
 from app.domain.common.exceptions.base import AccessDenied
-from app.domain.common.exceptions.repo import IntegrityViolationError
 from app.domain.user import dto
 from app.domain.user.access_policy import AccessPolicy
 from app.domain.user.exceptions.user import CantDeleteWithOrders, UserAlreadyExists
@@ -76,9 +75,10 @@ class AddUser(UserUseCase):
 
             logger.info("User persisted: id=%s, %s", user.id, user)
 
-        except IntegrityViolationError:
+        except UserAlreadyExists:
+            logger.error("User already exists: %s", user)
             await self.uow.rollback()
-            raise UserAlreadyExists
+            raise
 
         return dto.User.from_orm(user)
 
@@ -98,9 +98,9 @@ class DeleteUser(UserUseCase):
         try:
             await self.uow.user.delete_user(user_id)
             await self.uow.commit()
-        except IntegrityViolationError:
+        except CantDeleteWithOrders:
             await self.uow.rollback()
-            raise CantDeleteWithOrders()
+            raise
 
         logger.info("User deleted: id=%s,", user_id)
 
@@ -132,9 +132,9 @@ class PatchUser(UserUseCase):
         try:
             updated_user = await self.uow.user.edit_user(user=user)
             await self.uow.commit()
-        except IntegrityViolationError:
+        except UserAlreadyExists:
             await self.uow.rollback()
-            raise UserAlreadyExists
+            raise
 
         logger.info("User edited: id=%s,", updated_user.id)
 
