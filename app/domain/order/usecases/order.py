@@ -1,6 +1,9 @@
 import logging
 from abc import ABC
+from typing import List
 from uuid import UUID
+
+from pydantic import parse_obj_as
 
 from app.domain.common.events.dispatcher import EventDispatcher
 from app.domain.common.exceptions.base import AccessDenied
@@ -78,6 +81,40 @@ class GetOrder(OrderUseCase):
         return await self.uow.order_reader.order_by_id(order_id)
 
 
+class GetUserOrders(OrderUseCase):
+    async def __call__(self, user_id: int, limit: int, offset: int) -> list[dto.Order]:
+        return await self.uow.order_reader.get_user_orders(
+            user_id=user_id, limit=limit, offset=offset
+        )
+
+
+class GetUserOrdersCount(OrderUseCase):
+    async def __call__(self, user_id: int) -> int:
+        return await self.uow.order_reader.get_user_orders_count(user_id=user_id)
+
+
+class GetOrdersForConfirmation(OrderUseCase):
+    async def __call__(self, limit: int, offset: int) -> list[dto.Order]:
+        return await self.uow.order_reader.get_orders_for_confirmation(
+            limit=limit, offset=offset
+        )
+
+
+class GetOrdersForConfirmationCount(OrderUseCase):
+    async def __call__(self) -> int:
+        return await self.uow.order_reader.get_orders_for_confirmation_count()
+
+
+class GetAllOrders(OrderUseCase):
+    async def __call__(self, limit: int, offset: int) -> list[dto.Order]:
+        return await self.uow.order_reader.get_all_orders(limit=limit, offset=offset)
+
+
+class GetAllOrdersCount(OrderUseCase):
+    async def __call__(self) -> int:
+        return await self.uow.order_reader.get_all_orders_count()
+
+
 class OrderService:
     def __init__(
         self,
@@ -121,8 +158,54 @@ class OrderService:
             )(order_id=order_id)
         except OrderNotExists:
             order = None
-        if not self.access_policy.read_orders(order=order, order_id=order_id):
+        if not self.access_policy.read_order(order=order):
             raise AccessDenied()
         return await GetOrder(uow=self.uow, event_dispatcher=self.event_dispatcher)(
             order_id=order_id
         )
+
+    async def get_user_orders(
+        self, user_id: int, limit: int, offset: int
+    ) -> list[dto.Order]:
+        if not self.access_policy.read_user_orders(user_id=user_id):
+            raise AccessDenied()
+        return await GetUserOrders(
+            uow=self.uow, event_dispatcher=self.event_dispatcher
+        )(user_id=user_id, limit=limit, offset=offset)
+
+    async def get_user_orders_count(self, user_id: int) -> int:
+        if not self.access_policy.read_user_orders(user_id=user_id):
+            raise AccessDenied()
+        return await GetUserOrdersCount(
+            uow=self.uow, event_dispatcher=self.event_dispatcher
+        )(user_id=user_id)
+
+    async def get_orders_for_confirmation(
+        self, limit: int, offset: int
+    ) -> list[dto.Order]:
+        if not self.access_policy.read_all_orders():
+            raise AccessDenied()
+        return await GetOrdersForConfirmation(
+            uow=self.uow, event_dispatcher=self.event_dispatcher
+        )(limit=limit, offset=offset)
+
+    async def get_orders_for_confirmation_count(self) -> int:
+        if not self.access_policy.read_all_orders():
+            raise AccessDenied()
+        return await GetOrdersForConfirmationCount(
+            uow=self.uow, event_dispatcher=self.event_dispatcher
+        )()
+
+    async def get_all_orders(self, limit: int, offset: int) -> list[dto.Order]:
+        if not self.access_policy.read_all_orders():
+            raise AccessDenied()
+        return await GetAllOrders(uow=self.uow, event_dispatcher=self.event_dispatcher)(
+            limit=limit, offset=offset
+        )
+
+    async def get_all_orders_count(self) -> int:
+        if not self.access_policy.read_all_orders():
+            raise AccessDenied()
+        return await GetAllOrdersCount(
+            uow=self.uow, event_dispatcher=self.event_dispatcher
+        )()
