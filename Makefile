@@ -22,7 +22,7 @@ reformat:
 	$(py) isort $(code_dir) --profile black --filter-files
 
 .PHONY: prepare-volumes
-copy-redis-config:
+prepare-volumes:
 	$(call setup_env, .env)
 	bash prepare_volumes.sh
 
