@@ -16,15 +16,15 @@ Released to open source as an example of using aiogram v3, aiogram-dialog and se
 
 ### Project deployment:
 1. Clone the repository:
-    git clone https://github.com/darksidecat/orders_bot.git
+    `git clone https://github.com/darksidecat/orders_bot.git`
 
-2. Copy .env.example to .env and fill in the values
+2. Copy `.env.example` to `.env` and fill in the values
 
 4. Create volumes by running:
-    make prepare-volumes
+    `make prepare-volumes`
 
 5. Up bot and environment by running:
-    make prod
+    `make prod`
 
 ### ToDo's
 * Coverage critical code with tests;
