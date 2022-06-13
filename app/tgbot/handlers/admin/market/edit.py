@@ -5,14 +5,7 @@ from aiogram.types import CallbackQuery, Message
 from aiogram_dialog import Dialog, DialogManager, Window
 from aiogram_dialog.manager.protocols import ManagedDialogAdapterProto
 from aiogram_dialog.widgets.input import MessageInput
-from aiogram_dialog.widgets.kbd import (
-    Back,
-    Button,
-    Cancel,
-    ScrollingGroup,
-    Select,
-    Start,
-)
+from aiogram_dialog.widgets.kbd import Back, Button, Cancel, ScrollingGroup, Select
 from aiogram_dialog.widgets.managed import ManagedWidgetAdapter
 from aiogram_dialog.widgets.text import Const, Format
 

@@ -22,7 +22,7 @@ from aiogram_dialog.widgets.text import Const, Format, Multi
 from app.domain.access_levels.interfaces.uow import IAccessLevelUoW
 from app.domain.access_levels.usecases.access_levels import AccessLevelsService
 from app.domain.user.dto.user import PatchUserData, UserPatch
-from app.domain.user.exceptions.user import UserNotExists
+from app.domain.user.exceptions.user import UserNotExists, BlockedUserWithOtherRole
 from app.domain.user.interfaces.uow import IUserUoW
 from app.domain.user.usecases.user import UserService
 from app.infrastructure.database.models import TelegramUser
@@ -176,6 +176,10 @@ async def save_access_levels(
         await query.answer("select at least one level")
         return
 
+    if len(selected_levels) > 1 and '-1' in selected_levels:
+        await query.answer("Blocked user can't have other roles")
+        return
+
     await dialog_manager.done({ACCESS_LEVELS: selected_levels})
 
 
@@ -194,7 +198,11 @@ async def save_edited_user(
         ),
     )
 
-    new_user = await user_service.patch_user(user)
+    try:
+        new_user = await user_service.patch_user(user)
+    except BlockedUserWithOtherRole as err:
+        await query.answer(str(err))
+        return
     levels_names = ", ".join((level.name.name for level in new_user.access_levels))
 
     result = fmt.pre(

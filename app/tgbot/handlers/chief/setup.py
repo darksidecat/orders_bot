@@ -1,4 +1,4 @@
-from aiogram import Dispatcher, Router
+from aiogram import Router
 
 from app.tgbot.handlers.chief.order_confirm import register_handlers
 

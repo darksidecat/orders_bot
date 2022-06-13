@@ -3,7 +3,6 @@ from aiogram_dialog import DialogRegistry
 
 from .add_order import add_order_dialog
 from .main_menu import main_menu_dialog
-from .start import register_start
 
 
 def register_user_handlers(

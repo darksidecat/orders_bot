@@ -1,15 +1,14 @@
 from typing import List
 from uuid import UUID
 
-from asyncpg import CheckViolationError
 from sqlalchemy import insert
 from sqlalchemy.exc import IntegrityError
 
 from app.domain.goods.exceptions.goods import GoodsNotExists
 from app.domain.goods.models.goods import Goods
-from app.domain.goods.models.goods_type import GoodsType
 from app.domain.order import dto
 from app.domain.order.exceptions.order import (
+    OrderAlreadyExists,
     OrderLineGoodsHasIncorrectType,
     OrderNotExists,
 )

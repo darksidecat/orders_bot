@@ -22,7 +22,7 @@ class AccessLevelFilter(BaseFilter):
 
     async def __call__(self, obj: TelegramObject, user: User, session: Session) -> bool:
         if not user:
-            if self.access_levels is LevelName.UNREGISTERED:
+            if not self.access_levels:
                 return True
             return False
 

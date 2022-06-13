@@ -131,7 +131,9 @@ async def add_order_yes_no(
 
 
 async def new_order_id_getter(dialog_manager: DialogManager, **kwargs):
-    return {"new_order_id": dialog_manager.current_context().dialog_data.get("new_order_id")}
+    return {
+        "new_order_id": dialog_manager.current_context().dialog_data.get("new_order_id")
+    }
 
 
 async def get_active_markets(

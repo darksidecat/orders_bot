@@ -1,6 +1,6 @@
 from sqlalchemy import BOOLEAN, TEXT, CheckConstraint, Column
 from sqlalchemy import Enum as SQLEnum
-from sqlalchemy import ForeignKey, ForeignKeyConstraint, Table, UniqueConstraint, func
+from sqlalchemy import ForeignKeyConstraint, Table, UniqueConstraint, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 

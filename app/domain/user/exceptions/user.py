@@ -18,7 +18,7 @@ class UserWithNoAccessLevels(UserException):
 
 
 class BlockedUserWithOtherRole(UserException):
-    """Blocked user can have only that role"""
+    """Blocked user can't have other roles"""
 
 
 class CantDeleteWithOrders(UserException):

@@ -25,7 +25,10 @@ async def order_created_handler(event: OrderCreated, data: dict[str, Any]):
 
     users: list[User] = await user_service.get_users_for_confirmation()
 
-    message_text = f"New order {fmt.pre(event.order.id)} from {event.order.creator.name}\n\n" + format_order_message(event.order)
+    message_text = (
+        f"New order {fmt.pre(event.order.id)} from {event.order.creator.name}\n\n"
+        + format_order_message(event.order)
+    )
 
     sent_messages = []
     for user in users:

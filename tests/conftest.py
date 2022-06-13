@@ -1,12 +1,10 @@
 import asyncio
-import os
 
 import alembic
 import alembic.config
-import sqlalchemy
 from alembic import command
 from pytest import fixture
-from sqlalchemy import engine, event
+from sqlalchemy import event
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import clear_mappers
 

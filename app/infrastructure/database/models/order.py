@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from sqlalchemy import BIGINT, INT, TEXT, CheckConstraint, Column, DateTime
 from sqlalchemy import Enum as SQLEnum
-from sqlalchemy import ForeignKey, ForeignKeyConstraint, Table, and_, func
+from sqlalchemy import ForeignKey, ForeignKeyConstraint, Table, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
