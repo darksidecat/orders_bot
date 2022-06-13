@@ -21,6 +21,11 @@ reformat:
 	$(py) black $(code_dir)
 	$(py) isort $(code_dir) --profile black --filter-files
 
+.PHONY: prepare-volumes
+copy-redis-config:
+	$(call setup_env, .env)
+	bash prepare_volumes.sh
+
 .PHONY: dev-docker
 dev-docker:
 	docker compose -f=docker-compose-dev.yml --env-file=.env up
@@ -46,4 +51,4 @@ tests:
 
 .PHONY: prod
 prod:
-	docker compose -f=./deployment/docker-compose.yml --env-file=./deployment/.env.dev up
+	docker compose -f=docker-compose.yml --env-file=.env up
