@@ -83,6 +83,7 @@ async def save_quantity(
 def format_order_message(order: dto.Order):
     result = fmt.quote(
         f"Id:       {str(order.id)}\n"
+        f"Created at: {order.created_at}\n"
         f"Creator:  {order.creator.name}\n"
         f"Market:   {order.recipient_market.name}\n"
         f"Comments: {order.commentary}\n\n"

@@ -17,6 +17,7 @@ class GoodsPatch(DTO):
     name: Optional[str] = UNSET
     parent_id: Optional[UUID] = UNSET
     sku: Optional[str] = UNSET
+    is_active: Optional[bool] = UNSET
 
 
 class Goods(DTO):

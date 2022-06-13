@@ -3,6 +3,7 @@ from abc import ABC
 from typing import List
 from uuid import UUID
 
+from app.domain.common.dto.base import UNSET
 from app.domain.common.events.dispatcher import EventDispatcher
 from app.domain.common.exceptions.base import AccessDenied
 from app.domain.market import dto
@@ -59,7 +60,12 @@ class AddMarket(MarketUseCase):
 class PatchMarket(MarketUseCase):
     async def __call__(self, patch_market_data: dto.MarketPatch) -> Market:
         market = await self.uow.market.market_by_id(patch_market_data.id)
-        market.name = patch_market_data.name
+
+        if patch_market_data.name is not UNSET:
+            market.name = patch_market_data.name
+        if patch_market_data.is_active is not UNSET:
+            market.is_active = patch_market_data.is_active
+
         await self.uow.market.edit_market(market)
         await self.uow.commit()
 

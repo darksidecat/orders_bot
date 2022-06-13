@@ -24,7 +24,7 @@ MY_ORDERS = "my_orders"
 ORDERS_FOR_CONFIRMATION = "orders_for_confirmation"
 ALL_ORDERS = "all_orders"
 
-ORDERS_ON_PAGE_LIMIT = 3
+ORDERS_ON_PAGE_LIMIT = 2
 
 
 async def history_access_getter(dialog_manager: DialogManager, user: User, **kwargs):

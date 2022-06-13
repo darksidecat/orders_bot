@@ -123,7 +123,14 @@ async def change_active_status(
     parent_id = manager.current_context().dialog_data.get(SELECTED_GOODS)
     parent_id_as_uuid = UUID(parent_id) if parent_id is not None else None
     try:
-        await goods_service.change_goods_status(parent_id_as_uuid)
+        await goods_service.patch_goods(
+            GoodsPatch(
+                id=parent_id_as_uuid,
+                is_active=not (
+                    await goods_service.get_goods_by_id(parent_id_as_uuid)
+                ).is_active,
+            )
+        )
     except CantMakeInactiveWithActiveChildren:
         await query.answer("Can't make inactive with active children")
     except CantMakeActiveWithInactiveParent:
@@ -204,6 +211,7 @@ goods_name_dialog = Dialog(
     Window(
         Format("Input new name"),
         MessageInput(request_name),
+        Cancel(Const("❌ Cancel")),
         state=states.goods_db.EditGoodsName.request,
     ),
     on_start=copy_start_data_to_context,
@@ -213,6 +221,7 @@ goods_sku_dialog = Dialog(
     Window(
         Format("Input new SKU"),
         MessageInput(request_sku),
+        Cancel(Const("❌ Cancel")),
         state=states.goods_db.EditGoodsSKU.request,
     ),
     on_start=copy_start_data_to_context,
@@ -236,7 +245,7 @@ selected_goods_dialog = Dialog(
         ),
         Row(
             Button(
-                Const("Invert active status"),
+                Const("✅ ❌ Change active status"),
                 on_click=change_active_status,
                 id="mark_inactive",
             ),

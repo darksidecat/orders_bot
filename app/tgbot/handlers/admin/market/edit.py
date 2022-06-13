@@ -29,7 +29,7 @@ async def add_new_market(
 async def get_markets(
     dialog_manager: DialogManager, market_service: MarketService, **kwargs
 ):
-    markets = await market_service.get_all_markets(only_active=True)
+    markets = await market_service.get_all_markets(only_active=False)
     return {MARKET: markets}
 
 
@@ -78,6 +78,20 @@ async def delete_market(
     await manager.dialog().switch_to(states.market_db.EditMarket.select_market)
 
 
+async def change_market_active_status(
+    query: CallbackQuery, button: Button, manager: DialogManager, **kwargs
+):
+    market_service: MarketService = manager.data.get("market_service")
+
+    market_id = manager.current_context().dialog_data.get(SELECTED_MARKET)
+    market_id_as_uuid = UUID(market_id) if market_id is not None else None
+    market = await market_service.get_market_by_id(market_id_as_uuid)
+    await market_service.patch_market(
+        MarketPatch(id=market_id_as_uuid, is_active=not market.is_active)
+    )
+    await manager.dialog().back()
+
+
 async def get_selected_market(
     dialog_manager: DialogManager, market_service: MarketService, **kwargs
 ):
@@ -102,7 +116,7 @@ edit_goods_dialog = Dialog(
         Const("Select market for editing:"),
         ScrollingGroup(
             Select(
-                Format("{item.name}"),
+                Format("{item.active_icon} {item.name}"),
                 id=SELECTOR_MARKET_ID,
                 item_id_getter=attrgetter("id"),
                 items=MARKET,
@@ -122,6 +136,11 @@ edit_goods_dialog = Dialog(
         Const("Select option"),
         Button(
             Const("Edit name"), on_click=start_edit_market_name_dialog, id="edit_name"
+        ),
+        Button(
+            Const("✅ ❌ Change active status"),
+            on_click=change_market_active_status,
+            id="change_status",
         ),
         Button(Const("🗑️ Delete"), on_click=delete_market, id="delete_goods"),
         Back(Const("🔙 Back")),

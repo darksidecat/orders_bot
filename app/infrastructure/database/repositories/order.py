@@ -16,13 +16,16 @@ from app.domain.order.exceptions.order import (
 from app.domain.order.interfaces.persistence import IOrderReader, IOrderRepo
 from app.domain.order.models.confirmed_status import ConfirmedStatus
 from app.domain.order.models.order import Order, OrderLine
+from app.infrastructure.database.exception_mapper import exception_mapper
 from app.infrastructure.database.repositories.repo import SQLAlchemyRepo
 
 
 class OrderReader(SQLAlchemyRepo, IOrderReader):
+    @exception_mapper
     async def all_orders(self) -> List[dto.Order]:
         ...
 
+    @exception_mapper
     async def order_by_id(self, order_id: UUID) -> Order:
         order = await self.session.get(Order, order_id)
 
@@ -31,6 +34,7 @@ class OrderReader(SQLAlchemyRepo, IOrderReader):
 
         return dto.Order.from_orm(order)
 
+    @exception_mapper
     async def get_user_orders(
         self, user_id: int, limit: int, offset: int
     ) -> List[dto.Order]:
@@ -47,6 +51,7 @@ class OrderReader(SQLAlchemyRepo, IOrderReader):
 
         return parse_obj_as(List[dto.Order], orders)
 
+    @exception_mapper
     async def get_user_orders_count(self, user_id: int) -> int:
         query = select(func.count(Order.id)).where(Order.creator.has(id=user_id))
 
@@ -55,6 +60,7 @@ class OrderReader(SQLAlchemyRepo, IOrderReader):
 
         return count
 
+    @exception_mapper
     async def get_orders_for_confirmation(self, limit: int, offset: int) -> List[Order]:
         query = (
             select(Order)
@@ -69,6 +75,7 @@ class OrderReader(SQLAlchemyRepo, IOrderReader):
 
         return parse_obj_as(List[dto.Order], orders)
 
+    @exception_mapper
     async def get_orders_for_confirmation_count(self) -> int:
         query = select(func.count(Order.id)).where(
             Order.confirmed == ConfirmedStatus.NOT_PROCESSED
@@ -79,6 +86,7 @@ class OrderReader(SQLAlchemyRepo, IOrderReader):
 
         return count
 
+    @exception_mapper
     async def get_all_orders(self, limit: int, offset: int) -> List[dto.Order]:
         query = select(Order).limit(limit).offset(offset)
         result = await self.session.execute(query)
@@ -86,6 +94,7 @@ class OrderReader(SQLAlchemyRepo, IOrderReader):
 
         return parse_obj_as(List[dto.Order], orders)
 
+    @exception_mapper
     async def get_all_orders_count(self) -> int:
         query = select(func.count(Order.id))
         result = await self.session.execute(query)
@@ -95,6 +104,7 @@ class OrderReader(SQLAlchemyRepo, IOrderReader):
 
 
 class OrderRepo(SQLAlchemyRepo, IOrderRepo):
+    @exception_mapper
     async def create_order(self, order: dto.OrderCreate) -> Order:
         query = (
             insert(Order)
@@ -133,6 +143,7 @@ class OrderRepo(SQLAlchemyRepo, IOrderRepo):
         await self.session.flush()
         return new_order
 
+    @exception_mapper
     async def order_by_id(self, order_id: UUID) -> Order:
         order = await self.session.get(Order, order_id)
 
@@ -141,6 +152,7 @@ class OrderRepo(SQLAlchemyRepo, IOrderRepo):
 
         return order
 
+    @exception_mapper
     async def edit_order(self, order: Order) -> Order:
         try:
             await self.session.flush()

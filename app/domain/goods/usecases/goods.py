@@ -15,6 +15,7 @@ from app.domain.goods.exceptions.goods import (
     CantMakeInactiveWithActiveChildren,
     CantSetFolderSKU,
     GoodsAlreadyExists,
+    GoodsNotExists,
 )
 from app.domain.goods.interfaces.uow import IGoodsUoW
 from app.domain.goods.models.goods import Goods
@@ -78,30 +79,6 @@ class GetGoods(GoodsUseCase):
         return dto.Goods.from_orm(goods)
 
 
-class ChangeGoodsStatus(GoodsUseCase):
-    async def __call__(self, goods_id: Optional[UUID]) -> dto.Goods:
-        goods = await self.uow.goods.goods_by_id(goods_id)
-        goods.is_active = not goods.is_active
-
-        if goods.is_active is False:
-            children = await self.uow.goods_reader.goods_in_folder(
-                parent_id=goods.id, only_active=False
-            )
-            children_statuses = (
-                [child.is_active for child in children] if children else []
-            )
-            if True in children_statuses:
-                raise CantMakeInactiveWithActiveChildren()
-
-        else:
-            parent = await self.uow.goods_reader.goods_by_id(goods.parent_id)
-            if parent.is_active is False:
-                raise CantMakeActiveWithInactiveParent()
-
-        await self.uow.commit()
-        return dto.Goods.from_orm(goods)
-
-
 class DeleteGoods(GoodsUseCase):
     async def __call__(self, goods_id: Optional[UUID]) -> None:
         try:
@@ -124,6 +101,28 @@ class PatchGoods(GoodsUseCase):
             if goods.type == GoodsType.FOLDER:
                 raise CantSetFolderSKU()
             goods.sku = patch_goods_data.sku
+
+        if patch_goods_data.is_active is not UNSET:
+            if patch_goods_data.is_active is False:
+                children = await self.uow.goods_reader.goods_in_folder(
+                    parent_id=goods.id, only_active=False
+                )
+                children_statuses = (
+                    [child.is_active for child in children] if children else []
+                )
+                if True in children_statuses:
+                    raise CantMakeInactiveWithActiveChildren()
+
+            else:
+                try:
+                    parent = await self.uow.goods_reader.goods_by_id(goods.parent_id)
+                    if parent.is_active is False:
+                        raise CantMakeActiveWithInactiveParent()
+                except GoodsNotExists:
+                    pass  # parent is not exists so it's ok
+
+            goods.is_active = patch_goods_data.is_active
+
         await self.uow.goods.edit_goods(goods=goods)
         await self.uow.commit()
         return dto.Goods.from_orm(goods)
@@ -162,13 +161,6 @@ class GoodsService:
         return await GetGoodsInFolder(
             uow=self.uow, event_dispatcher=self.event_dispatcher
         )(parent_id=parent_id, only_active=only_active)
-
-    async def change_goods_status(self, goods_id: UUID) -> dto.Goods:
-        if not self.access_policy.modify_goods():
-            raise AccessDenied()
-        return await ChangeGoodsStatus(
-            uow=self.uow, event_dispatcher=self.event_dispatcher
-        )(goods_id=goods_id)
 
     async def delete_goods(self, goods_id: UUID) -> None:
         if not self.access_policy.modify_goods():
