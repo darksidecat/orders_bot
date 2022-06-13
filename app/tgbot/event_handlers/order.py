@@ -25,9 +25,7 @@ async def order_created_handler(event: OrderCreated, data: dict[str, Any]):
 
     users: list[User] = await user_service.get_users_for_confirmation()
 
-    message_text = fmt.pre(
-        f"New order from {event.order.creator.name}\n\n"
-    ) + format_order_message(event.order)
+    message_text = f"New order {fmt.pre(event.order.id)} from {event.order.creator.name}\n\n" + format_order_message(event.order)
 
     sent_messages = []
     for user in users:
@@ -54,7 +52,7 @@ async def order_confirm_handler(event: OrderConfirmStatusChanged, data: dict[str
 
     await bot.send_message(
         chat_id=event.order.creator.id,
-        text=f"Order {event.order.id} confirmed by {event.user.name}\n\n"
+        text=f"Order {fmt.pre(event.order.id)} confirmed by {event.user.name}\n\n"
         + format_order_message(event.order),
     )
 

@@ -124,9 +124,14 @@ async def add_order_yes_no(
 
     new_order = await order_service.add_order(order)
     data["result"] = format_order_message(new_order)
+    data["new_order_id"] = str(new_order.id)
 
     await manager.dialog().next()
     await query.answer()
+
+
+async def new_order_id_getter(dialog_manager: DialogManager, **kwargs):
+    return {"new_order_id": dialog_manager.current_context().dialog_data.get("new_order_id")}
 
 
 async def get_active_markets(
@@ -266,10 +271,10 @@ add_order_dialog = Dialog(
         parse_mode="HTML",
     ),
     Window(
-        Const("Order created\n\n"),
+        Format("Order <pre>{new_order_id}</pre> created \n\n"),
         Format("{result}"),
         Cancel(Const("❌ Close"), on_click=enable_send_mode),
-        getter=[result_getter],
+        getter=[result_getter, new_order_id_getter],
         state=states.add_order.AddOrder.result,
         parse_mode="HTML",
     ),
