@@ -34,7 +34,7 @@ class TestGoodsReader:
                 type=GoodsType.GOODS,
                 name="A-Goods2",
                 sku="A-SKU2",
-                parent_id=folder1.id,
+                parent=folder1,
             )
         )
         await goods_repo.session.commit()
@@ -102,7 +102,7 @@ class TestGoodsRepo:
                     name="GoodsName",
                     type=GoodsType.GOODS,
                     sku="123",
-                    parent_id=goods_type.id,
+                    parent=goods_type,
                 )
             )
             await goods_repo.session.commit()
@@ -190,9 +190,7 @@ class TestGoodsRepo:
             Goods.create(name="Folder", type=GoodsType.FOLDER)
         )
         await goods_repo.add_goods(
-            Goods.create(
-                name="Goods", type=GoodsType.GOODS, sku="123", parent_id=folder.id
-            )
+            Goods.create(name="Goods", type=GoodsType.GOODS, sku="123", parent=folder)
         )
         await goods_repo.session.commit()
 

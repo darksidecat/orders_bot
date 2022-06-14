@@ -32,14 +32,14 @@ class SQLAlchemyUoW(
     SQLAlchemyBaseUoW, IUserUoW, IAccessLevelUoW, IGoodsUoW, IMarketUoW, IOrderUoW
 ):
     user: IUserRepo
-    user_reader = IUserReader
+    user_reader: IUserReader
     access_level_reader: IAccessLevelReader
     goods: IGoodsRepo
     goods_reader: IGoodsReader
     market: IMarketRepo
     market_reader: IMarketReader
-    order = IOrderRepo
-    order_reader = IOrderReader
+    order: IOrderRepo
+    order_reader: IOrderReader
 
     def __init__(
         self,

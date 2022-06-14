@@ -11,6 +11,14 @@ from sqlalchemy.orm import clear_mappers
 from app.config import load_config
 from app.infrastructure.database.db import make_connection_string, sa_sessionmaker
 from app.infrastructure.database.models import map_tables
+from app.infrastructure.database.repositories import (
+    MarketReader,
+    MarketRepo,
+    OrderReader,
+    OrderRepo,
+    UserReader,
+    UserRepo,
+)
 from app.infrastructure.database.repositories.goods import GoodsReader, GoodsRepo
 
 
@@ -86,3 +94,33 @@ def goods_reader(db_session):
 @fixture
 def goods_repo(db_session):
     return GoodsRepo(session=db_session)
+
+
+@fixture
+def order_repo(db_session):
+    return OrderRepo(session=db_session)
+
+
+@fixture
+def order_reader(db_session):
+    return OrderReader(session=db_session)
+
+
+@fixture
+def market_repo(db_session):
+    return MarketRepo(session=db_session)
+
+
+@fixture
+def market_reader(db_session):
+    return MarketReader(session=db_session)
+
+
+@fixture
+def user_repo(db_session):
+    return UserRepo(session=db_session)
+
+
+@fixture
+def user_reader(db_session):
+    return UserReader(session=db_session)

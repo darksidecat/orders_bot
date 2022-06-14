@@ -25,6 +25,9 @@ class Market(Aggregate):
 
         return market
 
+    def __eq__(self, other):
+        return self.id == other.id
+
 
 class MarketCreated(Event):
     def __init__(self, market: dto.Market):

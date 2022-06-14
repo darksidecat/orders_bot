@@ -49,7 +49,6 @@ class Order(Aggregate):
     order_messages: List[OrderMessage] = attrs.field(factory=list)
 
     def create(self):
-        print(type(self.order_lines[0].goods.type))
         self.events.append(OrderCreated(dto.order.Order.from_orm(self)))
 
     def add_order_line(self, order_line: OrderLine):

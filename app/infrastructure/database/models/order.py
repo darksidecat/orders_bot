@@ -156,6 +156,7 @@ def map_order():
                 OrderLine,
                 backref="order",
                 lazy="joined",
+                passive_deletes="all",
             ),
             "order_messages": relationship(
                 OrderMessage,

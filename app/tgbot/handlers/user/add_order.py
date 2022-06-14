@@ -62,9 +62,7 @@ async def go_to_next_level(
 ):
     goods_service: GoodsService = manager.data.get("goods_service")
 
-    if (
-        await goods_service.get_goods_by_id(UUID(item_id))
-    ).type == GoodsType.GOODS:
+    if (await goods_service.get_goods_by_id(UUID(item_id))).type == GoodsType.GOODS:
         manager.current_context().dialog_data[SELECTED_GOODS] = item_id
         await manager.dialog().next()
     else:

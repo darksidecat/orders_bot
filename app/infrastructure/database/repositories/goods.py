@@ -69,7 +69,7 @@ class GoodsRepo(SQLAlchemyRepo, IGoodsRepo):
         except IntegrityError as err:
             if "goods_pkey" in str(err):
                 raise GoodsAlreadyExists
-            if "fk_goods_goods" in str(err):
+            if "fk_goods_goods" in str(err) or "goods_parent_type_check" in str(err):
                 raise GoodsTypeCantBeParent
             if "ck_folder_sku_null" in str(err):
                 raise CantSetSKUForFolder()

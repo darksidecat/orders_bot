@@ -141,9 +141,6 @@ class OrderRepo(SQLAlchemyRepo, IOrderRepo):
 
         new_order: Order = await self.session.get(Order, new_order_id)
 
-        print("GOODS", new_order.order_lines[0].goods.type is GoodsGoodsType.GOODS)
-        print("ORDER", new_order.order_lines[0].goods.type is GoodsType.GOODS)
-
         new_order.create()
         await self.session.flush()
         return new_order
@@ -161,6 +158,7 @@ class OrderRepo(SQLAlchemyRepo, IOrderRepo):
     async def edit_order(self, order: Order) -> Order:
         try:
             await self.session.flush()
+            await self.session.refresh(order)
         except IntegrityError:
             raise OrderAlreadyExists
 
