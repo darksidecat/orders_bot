@@ -3,13 +3,13 @@ import math
 from aiogram.types import CallbackQuery
 from aiogram.utils.text_decorations import html_decoration as fmt
 from aiogram_dialog import Dialog, DialogManager, Window
-from aiogram_dialog.widgets.kbd import Back, Button, Cancel, Row
+from aiogram_dialog.widgets.kbd import Back, Button, Cancel, Next, Row
 from aiogram_dialog.widgets.text import Const, Format
 
 from app.domain.access_levels.models.access_level import LevelName
 from app.domain.order.usecases.order import OrderService
 from app.domain.user.dto import User
-from app.tgbot.handlers.user.add_order import format_order_message
+from app.tgbot.handlers.user.common import format_order_message
 from app.tgbot.states import history
 
 my_orders_access_levels = [
@@ -95,12 +95,6 @@ async def reset_offset(
     manager.current_context().dialog_data["offset"] = 0
 
 
-async def import_orders_data(
-    query: CallbackQuery, button: Button, manager: DialogManager, **kwargs
-):
-    ...
-
-
 async def save_history_level(
     query: CallbackQuery, button: Button, manager: DialogManager, **kwargs
 ):
@@ -132,6 +126,7 @@ history_dialog = Dialog(
         Cancel(Const("❌ Close")),
         state=history.History.select_history_level,
         getter=[history_access_getter],
+        preview_add_transitions=[Next()],
     ),
     Window(
         Const("Select an option"),
@@ -151,7 +146,7 @@ history_dialog = Dialog(
                 when="has_next",
             ),
         ),
-        Button(Const("💾 Import data"), id="import_data", on_click=import_orders_data),
+        Button(Const("💾 Import data"), id="import_data"),
         Back(Const("↩️ Back to history"), on_click=reset_offset),
         Cancel(Const("❌ Close")),
         state=history.History.show,

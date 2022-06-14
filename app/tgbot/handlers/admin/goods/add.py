@@ -178,6 +178,7 @@ add_goods_dialog = Dialog(
         getter=get_goods_data,
         state=states.goods_db.AddGoods.confirm,
         parse_mode="HTML",
+        preview_add_transitions=[Next()],
     ),
     Window(
         Format("{result}"),

@@ -2,7 +2,6 @@ from operator import attrgetter, itemgetter
 from uuid import UUID
 
 from aiogram.types import CallbackQuery, Message
-from aiogram.utils.text_decorations import html_decoration as fmt
 from aiogram_dialog import Dialog, DialogManager, Window
 from aiogram_dialog.manager.protocols import ManagedDialogAdapterProto
 from aiogram_dialog.widgets.input import MessageInput, TextInput
@@ -21,7 +20,6 @@ from aiogram_dialog.widgets.text import Const, Format, Multi
 from app.domain.goods.models.goods_type import GoodsType
 from app.domain.goods.usecases.goods import GoodsService
 from app.domain.market.usecases import MarketService
-from app.domain.order import dto
 from app.domain.order.dto import OrderCreate, OrderLineCreate
 from app.domain.order.usecases.order import OrderService
 from app.tgbot import states
@@ -44,6 +42,7 @@ from app.tgbot.handlers.admin.goods.edit import (
 from app.tgbot.handlers.admin.market.edit import save_selected_market_id
 from app.tgbot.handlers.admin.user.common import get_user_data
 from app.tgbot.handlers.dialogs.common import enable_send_mode, when_not
+from app.tgbot.handlers.user.common import format_order_message
 
 
 async def get_active_goods(
@@ -78,24 +77,6 @@ async def save_quantity(
 ):
     dialog_manager.current_context().dialog_data["quantity"] = quantity
     await dialog_manager.dialog().next()
-
-
-def format_order_message(order: dto.Order):
-    result = fmt.quote(
-        f"Id:       {str(order.id)}\n"
-        f"Created at: {order.created_at}\n"
-        f"Creator:  {order.creator.name}\n"
-        f"Market:   {order.recipient_market.name}\n"
-        f"Comments: {order.commentary}\n\n"
-        f"Status:   {order.confirmed.value} {order.confirmed_icon}\n"
-        f"Goods:\n"
-    )
-    for line in order.order_lines:
-        result += fmt.quote(
-            f"  Name:       {line.goods.name}\n" f"  Quantity:   {line.quantity}\n\n"
-        )
-    result = fmt.pre(result)
-    return result
 
 
 async def add_order_yes_no(
@@ -209,6 +190,7 @@ add_order_dialog = Dialog(
         Cancel(Const("❌ Cancel")),
         getter=[get_active_goods, get_current_goods, selected_goods_data],
         state=states.add_order.AddOrder.select_goods,
+        preview_add_transitions=[Next()],
     ),
     Window(
         order_adding_process,
@@ -223,6 +205,7 @@ add_order_dialog = Dialog(
             Back(Const("⬅️ Back")),
             Next(Const("➡ Next️"), when="quantity"),
         ),
+        Cancel(Const("❌ Cancel")),
         getter=order_adding_process_getter,
         state=states.add_order.AddOrder.input_quantity,
     ),
@@ -253,8 +236,11 @@ add_order_dialog = Dialog(
         order_adding_process,
         Const("Input commentary"),
         MessageInput(save_commentary),
-        Back(Const("⬅️ Back")),
-        Next(Const("➡ Next️"), when="commentary"),
+        Row(
+            Back(Const("⬅️ Back")),
+            Next(Const("➡ Next️"), when="commentary"),
+        ),
+        Cancel(Const("❌ Cancel")),
         getter=order_adding_process_getter,
         state=states.add_order.AddOrder.input_comment,
     ),
@@ -272,6 +258,7 @@ add_order_dialog = Dialog(
         getter=[get_user_data, order_adding_process_getter],
         state=states.add_order.AddOrder.confirm,
         parse_mode="HTML",
+        preview_add_transitions=[Next()],
     ),
     Window(
         Format("Order <pre>{new_order_id}</pre> created \n\n"),

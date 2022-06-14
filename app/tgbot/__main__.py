@@ -5,6 +5,7 @@ from aiogram import Bot, Dispatcher
 from aiogram.dispatcher.fsm.storage.memory import MemoryStorage, SimpleEventIsolation
 from aiogram.dispatcher.fsm.storage.redis import DefaultKeyBuilder, RedisStorage
 from aiogram_dialog import DialogRegistry
+from aiogram_dialog.tools import render_preview, render_transitions
 
 from app.config import load_config
 from app.domain.common.events.dispatcher import EventDispatcher
@@ -61,6 +62,8 @@ async def main():
     map_tables()
 
     try:
+        render_transitions(dialog_registry)
+        # await render_preview(registry=dialog_registry, file="preview.html")
         await set_commands(bot, config)
         await bot.get_updates(offset=-1)
         await dp.start_polling(bot, config=config, event_dispatcher=event_dispatcher)

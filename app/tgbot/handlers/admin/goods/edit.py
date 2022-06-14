@@ -8,7 +8,14 @@ from aiogram.utils.text_decorations import html_decoration as fmt
 from aiogram_dialog import Data, Dialog, DialogManager, Window
 from aiogram_dialog.manager.protocols import ManagedDialogAdapterProto
 from aiogram_dialog.widgets.input import MessageInput
-from aiogram_dialog.widgets.kbd import Button, Cancel, Row, ScrollingGroup, Select
+from aiogram_dialog.widgets.kbd import (
+    Button,
+    Cancel,
+    Row,
+    ScrollingGroup,
+    Select,
+    Start,
+)
 from aiogram_dialog.widgets.managed import ManagedWidgetAdapter
 from aiogram_dialog.widgets.text import Const, Format
 
@@ -254,6 +261,10 @@ selected_goods_dialog = Dialog(
         Cancel(),
         getter=get_current_goods,
         state=states.goods_db.EditSelectedGoods.select_action,
+        preview_add_transitions=[
+            Start(Const(""), id="", state=states.goods_db.EditGoodsName.request),
+            Start(Const(""), id="", state=states.goods_db.EditGoodsSKU.request),
+        ],
     ),
     on_start=copy_start_data_to_context,
 )
@@ -291,6 +302,12 @@ edit_goods_dialog = Dialog(
         Cancel(Const("❌ Close")),
         getter=[get_goods, get_current_goods, selected_goods_data],
         state=states.goods_db.EditGoods.select_goods,
+        preview_add_transitions=[
+            Start(Const(""), id="", state=states.goods_db.AddGoods.name),
+            Start(
+                Const(""), id="", state=states.goods_db.EditSelectedGoods.select_action
+            ),
+        ],
     ),
     on_process_result=process_result,
 )

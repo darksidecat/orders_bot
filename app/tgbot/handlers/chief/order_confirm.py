@@ -10,7 +10,7 @@ from app.domain.order.exceptions.order import OrderAlreadyConfirmed
 from app.domain.order.models.confirmed_status import ConfirmedStatus
 from app.domain.order.usecases.order import OrderService
 from app.domain.user.dto import User
-from app.tgbot.handlers.user.add_order import format_order_message
+from app.tgbot.handlers.user.common import format_order_message
 
 logger = logging.getLogger(__name__)
 

@@ -5,7 +5,15 @@ from aiogram.types import CallbackQuery, Message
 from aiogram_dialog import Dialog, DialogManager, Window
 from aiogram_dialog.manager.protocols import ManagedDialogAdapterProto
 from aiogram_dialog.widgets.input import MessageInput
-from aiogram_dialog.widgets.kbd import Back, Button, Cancel, ScrollingGroup, Select
+from aiogram_dialog.widgets.kbd import (
+    Back,
+    Button,
+    Cancel,
+    Next,
+    ScrollingGroup,
+    Select,
+    Start,
+)
 from aiogram_dialog.widgets.managed import ManagedWidgetAdapter
 from aiogram_dialog.widgets.text import Const, Format
 
@@ -96,9 +104,7 @@ async def get_selected_market(
     dialog_manager: DialogManager, market_service: MarketService, **kwargs
 ):
     market = dialog_manager.current_context().dialog_data.get(SELECTED_MARKET)
-    print(market)
     market = await market_service.get_market_by_id(UUID(market))
-    print(market)
     return {MARKET: market}
 
 
@@ -130,6 +136,10 @@ edit_goods_dialog = Dialog(
         Cancel(Const("❌ Close")),
         getter=get_markets,
         state=states.market_db.EditMarket.select_market,
+        preview_add_transitions=[
+            Next(),
+            Start(Const(""), id="", state=states.market_db.AddMarket.name),
+        ],
     ),
     Window(
         Format(f"Selected market: {{{MARKET}.name}}"),
@@ -147,5 +157,8 @@ edit_goods_dialog = Dialog(
         Cancel(Const("❌ Close")),
         getter=get_selected_market,
         state=states.market_db.EditMarket.select_action,
+        preview_add_transitions=[
+            Start(Const(""), id="", state=states.market_db.EditMarketName.request)
+        ],
     ),
 )
