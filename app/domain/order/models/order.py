@@ -12,6 +12,7 @@ from app.domain.common.models.entity import entity
 from app.domain.goods.models.goods import Goods
 from app.domain.market.models.market import Market
 from app.domain.order import dto
+from app.domain.order.exceptions.order import OrderAlreadyConfirmed
 from app.domain.order.models.confirmed_status import ConfirmedStatus
 from app.domain.user.dto import User
 from app.domain.user.models.user import TelegramUser
@@ -54,6 +55,8 @@ class Order(Aggregate):
         self.order_lines.append(order_line)
 
     def change_confirm_status(self, status: ConfirmedStatus, confirmed_by: User):
+        if self.confirmed is not ConfirmedStatus.NOT_PROCESSED:
+            raise OrderAlreadyConfirmed()
         self.confirmed = status
         self.events.append(
             OrderConfirmStatusChanged(dto.order.Order.from_orm(self), confirmed_by)

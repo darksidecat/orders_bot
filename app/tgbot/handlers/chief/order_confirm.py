@@ -7,6 +7,7 @@ from aiogram.exceptions import TelegramAPIError
 from aiogram.types import CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup
 
 from app.domain.order.exceptions.order import OrderAlreadyConfirmed
+from app.domain.order.models.confirmed_status import ConfirmedStatus
 from app.domain.order.usecases.order import OrderService
 from app.domain.user.dto import User
 from app.tgbot.handlers.user.add_order import format_order_message
@@ -46,9 +47,14 @@ async def confirm_order(
     user: User,
     bot: Bot,
 ):
+
+    confirmed_status = (
+        ConfirmedStatus.YES if callback_data.result else ConfirmedStatus.NO
+    )
+
     try:
         await order_service.change_confirm_status(
-            callback_data.order_id, confirmed=callback_data.result, confirmed_by=user
+            callback_data.order_id, confirmed_status=confirmed_status, confirmed_by=user
         )
     except OrderAlreadyConfirmed:
         await query.answer("Order already confirmed")

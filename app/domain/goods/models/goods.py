@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import uuid
-from typing import Optional, List
+from typing import List, Optional
 from uuid import UUID
 
 import attrs
@@ -11,8 +11,11 @@ from app.domain.common.events.event import Event
 from app.domain.common.models.aggregate import Aggregate
 from app.domain.common.models.entity import entity
 from app.domain.goods import dto
-from app.domain.goods.exceptions.goods import CantSetFolderSKU, CantMakeInactiveWithActiveChildren, \
-    CantMakeActiveWithInactiveParent
+from app.domain.goods.exceptions.goods import (
+    CantMakeActiveWithInactiveParent,
+    CantMakeInactiveWithActiveChildren,
+    CantSetFolderSKU,
+)
 from app.domain.goods.models.goods_type import GoodsType
 
 
@@ -61,9 +64,7 @@ class Goods(Aggregate):
 
     def change_active_status(self, is_active: bool) -> None:
         if is_active is False:
-            children_statuses = (
-                [child.is_active for child in self.children]
-            )
+            children_statuses = [child.is_active for child in self.children]
             if True in children_statuses:
                 raise CantMakeInactiveWithActiveChildren()
 

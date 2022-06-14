@@ -97,7 +97,6 @@ class PatchGoods(GoodsUseCase):
             goods.change_name(patch_goods_data.name)
         if patch_goods_data.sku is not UNSET:
             goods.change_sku(patch_goods_data.sku)
-
         if patch_goods_data.is_active is not UNSET:
             goods.change_active_status(patch_goods_data.is_active)
 

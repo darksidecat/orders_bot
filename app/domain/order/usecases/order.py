@@ -41,15 +41,10 @@ class AddOrder(OrderUseCase):
 
 class ChangeConfirmStatus(OrderUseCase):
     async def __call__(
-        self, order_id: UUID, confirmed: bool, confirmed_by: User
+        self, order_id: UUID, confirmed_status: ConfirmedStatus, confirmed_by: User
     ) -> dto.Order:
         order: Order = await self.uow.order.order_by_id(order_id)
-        if order.confirmed is not ConfirmedStatus.NOT_PROCESSED:
-            raise OrderAlreadyConfirmed()
-        elif confirmed:
-            order.change_confirm_status(ConfirmedStatus.YES, confirmed_by=confirmed_by)
-        else:
-            order.change_confirm_status(ConfirmedStatus.NO, confirmed_by=confirmed_by)
+        order.change_confirm_status(confirmed_status, confirmed_by=confirmed_by)
 
         await self.event_dispatcher.publish_events(order.events)
         await self.uow.order.edit_order(order)
@@ -134,13 +129,17 @@ class OrderService:
         )
 
     async def change_confirm_status(
-        self, order_id: UUID, confirmed: bool, confirmed_by: User
+        self, order_id: UUID, confirmed_status: ConfirmedStatus, confirmed_by: User
     ) -> dto.Order:
         if not self.access_policy.confirm_orders():
             raise AccessDenied()
         return await ChangeConfirmStatus(
             uow=self.uow, event_dispatcher=self.event_dispatcher
-        )(order_id=order_id, confirmed=confirmed, confirmed_by=confirmed_by)
+        )(
+            order_id=order_id,
+            confirmed_status=confirmed_status,
+            confirmed_by=confirmed_by,
+        )
 
     async def add_order_messages(
         self, order_id: UUID, messages: list[dto.OrderMessageCreate]
