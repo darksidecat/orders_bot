@@ -3,8 +3,8 @@ from typing import List
 from app.domain.access_levels.access_policy import AccessLevelsAccessPolicy
 from app.domain.access_levels.dto.access_level import AccessLevel
 from app.domain.access_levels.interfaces.uow import IAccessLevelUoW
-from app.domain.common.events.dispatcher import EventDispatcher
-from app.domain.common.exceptions.base import AccessDenied
+from app.domain.base.events.dispatcher import EventDispatcher
+from app.domain.base.exceptions.base import AccessDenied
 
 
 class AccessLevelsUseCase:

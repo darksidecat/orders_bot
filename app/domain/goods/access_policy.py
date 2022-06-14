@@ -8,19 +8,23 @@ class User(Protocol):
     can_confirm_order: bool
 
 
-class AccessLevelsAccessPolicy(Protocol):
-    def read_access_levels(self) -> bool:
+class GoodsAccessPolicy(Protocol):
+    def read_goods(self) -> bool:
+        ...
+
+    def modify_goods(self) -> bool:
         ...
 
 
-class AllowedAccessLevelsPolicy(AccessLevelsAccessPolicy):
+class AllowedGoodsAccessPolicy(GoodsAccessPolicy):
     def allow(self, *args, **kwargs):
         return True
 
-    read_access_levels = allow
+    read_goods = allow
+    modify_goods = allow
 
 
-class UserBasedAccessLevelsAccessPolicy(AccessLevelsAccessPolicy):
+class UserBasedGoodsAccessPolicy(GoodsAccessPolicy):
     def __init__(self, user: User):
         self.user = user
 
@@ -30,4 +34,5 @@ class UserBasedAccessLevelsAccessPolicy(AccessLevelsAccessPolicy):
     def _is_admin(self):
         return self.user.is_admin
 
-    read_access_levels = _is_not_blocked
+    read_goods = _is_not_blocked
+    modify_goods = _is_admin

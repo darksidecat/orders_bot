@@ -1,19 +1,16 @@
 import logging
 from abc import ABC
-from typing import List
 from uuid import UUID
 
-from pydantic import parse_obj_as
-
-from app.domain.common.events.dispatcher import EventDispatcher
-from app.domain.common.exceptions.base import AccessDenied
+from app.domain.base.events.dispatcher import EventDispatcher
+from app.domain.base.exceptions.base import AccessDenied
 from app.domain.order import dto
-from app.domain.order.exceptions.order import OrderAlreadyConfirmed, OrderNotExists
+from app.domain.order.access_policy import OrderAccessPolicy
+from app.domain.order.dto import User
+from app.domain.order.exceptions.order import OrderNotExists
 from app.domain.order.interfaces.uow import IOrderUoW
 from app.domain.order.models.confirmed_status import ConfirmedStatus
 from app.domain.order.models.order import Order, OrderMessage
-from app.domain.user.access_policy import AccessPolicy
-from app.domain.user.dto import User
 
 logger = logging.getLogger(__name__)
 
@@ -114,7 +111,7 @@ class OrderService:
     def __init__(
         self,
         uow: IOrderUoW,
-        access_policy: AccessPolicy,
+        access_policy: OrderAccessPolicy,
         event_dispatcher: EventDispatcher,
     ) -> None:
         self.uow = uow

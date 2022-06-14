@@ -2,8 +2,8 @@ from typing import List
 
 import attrs
 
-from app.domain.common.events.event import Event
-from app.domain.common.models.entity import entity
+from app.domain.base.events.event import Event
+from app.domain.base.models.entity import entity
 
 
 @entity

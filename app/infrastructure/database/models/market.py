@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from sqlalchemy import BOOLEAN, TEXT, Column, Table, func
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import relationship
 
 from app.domain.market.models.market import Market
 from app.infrastructure.database.models import mapper_registry
@@ -25,11 +24,4 @@ def map_market():
     mapper_registry.map_imperatively(
         Market,
         market_table,
-        properties={
-            "orders": relationship(
-                "Order",
-                back_populates="recipient_market",
-                passive_deletes="all",
-            ),
-        },
     )

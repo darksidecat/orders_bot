@@ -1,7 +1,7 @@
 from typing import List, Type
 
-from app.domain.common.events.event import Event
-from app.domain.common.events.observer import Handler, Observer
+from app.domain.base.events.event import Event
+from app.domain.base.events.observer import Handler, Observer
 
 
 class EventDispatcher:

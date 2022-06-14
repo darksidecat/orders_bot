@@ -4,7 +4,7 @@ from typing import List, Optional, Tuple
 
 from app.domain.access_levels.dto.access_level import AccessLevel
 from app.domain.access_levels.models.helper import Levels
-from app.domain.common.dto.base import DTO
+from app.domain.base.dto.base import DTO
 
 
 class UserCreate(DTO):

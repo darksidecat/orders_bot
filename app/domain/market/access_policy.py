@@ -8,19 +8,23 @@ class User(Protocol):
     can_confirm_order: bool
 
 
-class AccessLevelsAccessPolicy(Protocol):
-    def read_access_levels(self) -> bool:
+class MarketAccessPolicy1(Protocol):
+    def read_markets(self) -> bool:
+        ...
+
+    def modify_markets(self) -> bool:
         ...
 
 
-class AllowedAccessLevelsPolicy(AccessLevelsAccessPolicy):
+class AllowedMarketAccessPolicy(MarketAccessPolicy1):
     def allow(self, *args, **kwargs):
         return True
 
-    read_access_levels = allow
+    read_markets = allow
+    modify_markets = allow
 
 
-class UserBasedAccessLevelsAccessPolicy(AccessLevelsAccessPolicy):
+class UserBasedMarketAccessPolicy(MarketAccessPolicy1):
     def __init__(self, user: User):
         self.user = user
 
@@ -30,4 +34,5 @@ class UserBasedAccessLevelsAccessPolicy(AccessLevelsAccessPolicy):
     def _is_admin(self):
         return self.user.is_admin
 
-    read_access_levels = _is_not_blocked
+    read_markets = _is_not_blocked
+    modify_markets = _is_admin

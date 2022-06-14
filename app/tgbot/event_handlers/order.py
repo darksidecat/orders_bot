@@ -5,10 +5,12 @@ from aiogram import Bot
 from aiogram.exceptions import TelegramAPIError
 from aiogram.utils.text_decorations import html_decoration as fmt
 
-from app.domain.common.events.dispatcher import EventDispatcher
+from app.domain.base.events.dispatcher import EventDispatcher
+from app.domain.order.access_policy import AllowedOrderAccessPolicy
 from app.domain.order.dto.order import OrderMessageCreate
 from app.domain.order.models.order import OrderConfirmStatusChanged, OrderCreated
 from app.domain.order.usecases.order import OrderService
+from app.domain.user.access_policy import AllowedUserAccessPolicy
 from app.domain.user.dto import User
 from app.domain.user.usecases.user import UserService
 from app.tgbot.handlers.chief.order_confirm import confirm_order_keyboard
@@ -18,10 +20,20 @@ logger = logging.getLogger(__name__)
 
 
 async def order_created_handler(event: OrderCreated, data: dict[str, Any]):
-    user_service: UserService = data["user_service"]
-    order_service: OrderService = data["order_service"]
-
+    event_dispatcher = data.get("event_dispatcher")
+    uow = data.get("uow")
     bot: Bot = data["bot"]
+
+    user_service = UserService(
+        access_policy=AllowedUserAccessPolicy(),
+        event_dispatcher=event_dispatcher,
+        uow=uow,
+    )
+    order_service = OrderService(
+        access_policy=AllowedOrderAccessPolicy(),
+        event_dispatcher=event_dispatcher,
+        uow=uow,
+    )
 
     users: list[User] = await user_service.get_users_for_confirmation()
 

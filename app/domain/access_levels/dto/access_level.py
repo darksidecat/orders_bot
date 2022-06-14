@@ -1,5 +1,5 @@
 from app.domain.access_levels.models.access_level import LevelName
-from app.domain.common.dto.base import DTO
+from app.domain.base.dto.base import DTO
 
 
 class AccessLevel(DTO):

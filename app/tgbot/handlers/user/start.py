@@ -1,4 +1,4 @@
-from aiogram import Dispatcher, F
+from aiogram import Dispatcher
 from aiogram.dispatcher.filters.command import CommandStart
 from aiogram.dispatcher.fsm.state import any_state
 from aiogram.types import CallbackQuery, Message

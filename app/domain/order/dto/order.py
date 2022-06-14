@@ -3,17 +3,17 @@ from __future__ import annotations
 from datetime import datetime
 from uuid import UUID
 
-from app.domain.common.dto.base import DTO
-from app.domain.goods.dto import Goods
-from app.domain.goods.models.goods_type import GoodsType
-from app.domain.market.dto import Market
+from app.domain.base.dto.base import DTO
+from app.domain.order.dto.goods import Goods
+from app.domain.order.dto.market import Market
+from app.domain.order.dto.user import User
 from app.domain.order.models.confirmed_status import ConfirmedStatus
-from app.domain.user.dto import User
+from app.domain.order.models.goods import GoodsType
 
 
 class OrderLineCreate(DTO):
     goods_id: UUID
-    goods_type: GoodsType = GoodsType.GOODS
+    goods_type: GoodsType
     quantity: int
 
 
@@ -30,6 +30,13 @@ class OrderMessageCreate(DTO):
 class OrderMessage(DTO):
     message_id: int
     chat_id: int
+
+
+class OrderCreate(DTO):
+    order_lines: list[OrderLineCreate]
+    creator_id: int
+    recipient_market_id: UUID
+    commentary: str
 
 
 class Order(DTO):
@@ -50,10 +57,3 @@ class Order(DTO):
             return "❌"
         else:
             return ""
-
-
-class OrderCreate(DTO):
-    order_lines: list[OrderLineCreate]
-    creator_id: int
-    recipient_market_id: UUID
-    commentary: str

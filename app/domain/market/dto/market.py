@@ -1,7 +1,7 @@
 from typing import Optional
 from uuid import UUID
 
-from app.domain.common.dto.base import DTO, UNSET
+from app.domain.base.dto.base import DTO, UNSET
 
 
 class MarketCreate(DTO):

@@ -6,14 +6,15 @@ from sqlalchemy import ForeignKey, ForeignKeyConstraint, Table, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
-from app.domain.goods.models.goods import Goods
-from app.domain.goods.models.goods_type import GoodsType
-from app.domain.market.models.market import Market
+from app.domain.order import models
 from app.domain.order.models.confirmed_status import ConfirmedStatus
+from app.domain.order.models.goods import GoodsType
 from app.domain.order.models.order import Order, OrderLine, OrderMessage
-from app.domain.user.models.user import TelegramUser
 
 from .base import mapper_registry
+from .goods import goods_table
+from .market import market_table
+from .user import access_level_table, user_access_levels, user_table
 
 order_line_table = Table(
     "order_line",
@@ -110,7 +111,7 @@ def map_order():
         order_line_table,
         properties={
             "goods": relationship(
-                Goods,
+                models.goods.Goods,
                 lazy="joined",
                 uselist=False,
                 backref="order_lines",
@@ -136,7 +137,7 @@ def map_order():
         order_table,
         properties={
             "creator": relationship(
-                TelegramUser,
+                models.user.TelegramUser,
                 back_populates="orders",
                 lazy="joined",
                 innerjoin=True,
@@ -144,7 +145,7 @@ def map_order():
                 passive_deletes="all",
             ),
             "recipient_market": relationship(
-                Market,
+                models.market.Market,
                 back_populates="orders",
                 lazy="joined",
                 innerjoin=True,
@@ -161,5 +162,73 @@ def map_order():
                 back_populates="order",
                 lazy="joined",
             ),
+        },
+    )
+
+    mapper_registry.map_imperatively(
+        models.goods.Goods,
+        goods_table,
+        properties={
+            "parent": relationship(
+                models.goods.Goods,
+                remote_side=[goods_table.c.id, goods_table.c.type],
+                back_populates="children",
+                lazy="joined",
+                join_depth=1,
+                uselist=False,
+                viewonly=True,
+            ),
+            "children": relationship(
+                models.goods.Goods,
+                remote_side=[goods_table.c.parent_id, goods_table.c.parent_type],
+                back_populates="parent",
+                lazy="joined",
+                join_depth=1,
+                uselist=True,
+                viewonly=True,
+            ),
+        },
+    )
+
+    mapper_registry.map_imperatively(
+        models.market.Market,
+        market_table,
+        properties={
+            "orders": relationship(
+                "Order",
+                back_populates="recipient_market",
+                viewonly=True,
+            ),
+        },
+    )
+    mapper_registry.map_imperatively(
+        models.user.TelegramUser,
+        user_table,
+        properties={
+            "access_levels": relationship(
+                models.user.AccessLevel,
+                secondary=user_access_levels,
+                back_populates="users",
+                lazy="selectin",
+                viewonly=True,
+            ),
+            "orders": relationship(
+                "Order",
+                back_populates="creator",
+                lazy="noload",
+                viewonly=True,
+            ),
+        },
+    )
+    mapper_registry.map_imperatively(
+        models.user.AccessLevel,
+        access_level_table,
+        properties={
+            "users": relationship(
+                models.user.TelegramUser,
+                secondary=user_access_levels,
+                back_populates="access_levels",
+                viewonly=True,
+            )
         },
     )

@@ -1,6 +1,6 @@
 from enum import Enum, unique
 
-from app.domain.common.models.value_object import value_object
+from app.domain.base.models.value_object import value_object
 
 
 @unique

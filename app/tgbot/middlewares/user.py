@@ -3,7 +3,6 @@ from typing import Any, Awaitable, Callable, Dict
 from aiogram import BaseMiddleware
 from aiogram.types import Update
 
-from app.domain.user.access_policy import UserAccessPolicy
 from app.domain.user.exceptions.user import UserNotExists
 from app.domain.user.interfaces.uow import IUserUoW
 from app.domain.user.usecases.user import GetUser
@@ -31,8 +30,5 @@ class UserDB(BaseMiddleware):
                 user = None
 
             data["user"] = user
-
-            if user:
-                data["access_policy"] = UserAccessPolicy(user=user)
 
         return await handler(event, data)

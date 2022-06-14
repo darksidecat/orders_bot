@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domain.access_levels.interfaces.persistence import IAccessLevelReader
 from app.domain.access_levels.interfaces.uow import IAccessLevelUoW
-from app.domain.common.interfaces.uow import IUoW
+from app.domain.base.interfaces.uow import IUoW
 from app.domain.goods.interfaces.persistence import IGoodsReader, IGoodsRepo
 from app.domain.goods.interfaces.uow import IGoodsUoW
 from app.domain.market.interfaces.persistence import IMarketReader, IMarketRepo

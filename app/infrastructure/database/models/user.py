@@ -54,12 +54,6 @@ def map_user():
                 back_populates="users",
                 lazy="selectin",
             ),
-            "orders": relationship(
-                "Order",
-                back_populates="creator",
-                passive_deletes="all",
-                lazy="noload",
-            ),
         },
     )
     mapper_registry.map_imperatively(

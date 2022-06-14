@@ -1,4 +1,4 @@
-from app.domain.common.interfaces.uow import IUoW
+from app.domain.base.interfaces.uow import IUoW
 from app.domain.goods.interfaces.persistence import IGoodsReader, IGoodsRepo
 
 

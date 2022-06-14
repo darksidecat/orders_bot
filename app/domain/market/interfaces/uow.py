@@ -1,4 +1,4 @@
-from app.domain.common.interfaces.uow import IUoW
+from app.domain.base.interfaces.uow import IUoW
 from app.domain.market.interfaces.persistence import IMarketReader, IMarketRepo
 
 

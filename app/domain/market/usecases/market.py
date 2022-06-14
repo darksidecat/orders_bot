@@ -3,17 +3,17 @@ from abc import ABC
 from typing import List
 from uuid import UUID
 
-from app.domain.common.dto.base import UNSET
-from app.domain.common.events.dispatcher import EventDispatcher
-from app.domain.common.exceptions.base import AccessDenied
+from app.domain.base.dto.base import UNSET
+from app.domain.base.events.dispatcher import EventDispatcher
+from app.domain.base.exceptions.base import AccessDenied
 from app.domain.market import dto
+from app.domain.market.access_policy import UserBasedMarketAccessPolicy
 from app.domain.market.exceptions.market import (
     CantDeleteWithOrders,
     MarketAlreadyExists,
 )
 from app.domain.market.interfaces.uow import IMarketUoW
 from app.domain.market.models.market import Market
-from app.domain.user.access_policy import AccessPolicy
 
 logger = logging.getLogger(__name__)
 
@@ -86,7 +86,7 @@ class MarketService:
     def __init__(
         self,
         uow: IMarketUoW,
-        access_policy: AccessPolicy,
+        access_policy: UserBasedMarketAccessPolicy,
         event_dispatcher: EventDispatcher,
     ) -> None:
         self.uow = uow

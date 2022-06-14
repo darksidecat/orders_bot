@@ -3,10 +3,10 @@ from abc import ABC
 from typing import List
 
 from app.domain.access_levels.models.helper import id_to_access_levels
-from app.domain.common.events.dispatcher import EventDispatcher
-from app.domain.common.exceptions.base import AccessDenied
+from app.domain.base.events.dispatcher import EventDispatcher
+from app.domain.base.exceptions.base import AccessDenied
 from app.domain.user import dto
-from app.domain.user.access_policy import AccessPolicy
+from app.domain.user.access_policy import UserAccessPolicy
 from app.domain.user.exceptions.user import CantDeleteWithOrders, UserAlreadyExists
 from app.domain.user.interfaces.uow import IUserUoW
 from app.domain.user.models.user import TelegramUser
@@ -145,7 +145,7 @@ class UserService:
     def __init__(
         self,
         uow: IUserUoW,
-        access_policy: AccessPolicy,
+        access_policy: UserAccessPolicy,
         event_dispatcher: EventDispatcher,
     ) -> None:
         self.uow = uow

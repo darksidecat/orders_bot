@@ -7,6 +7,7 @@ from sqlalchemy.exc import IntegrityError
 
 from app.domain.goods.exceptions.goods import GoodsNotExists
 from app.domain.goods.models.goods import Goods
+from app.domain.goods.models.goods_type import GoodsType as GoodsGoodsType
 from app.domain.order import dto
 from app.domain.order.exceptions.order import (
     OrderAlreadyExists,
@@ -15,6 +16,7 @@ from app.domain.order.exceptions.order import (
 )
 from app.domain.order.interfaces.persistence import IOrderReader, IOrderRepo
 from app.domain.order.models.confirmed_status import ConfirmedStatus
+from app.domain.order.models.goods import GoodsType
 from app.domain.order.models.order import Order, OrderLine
 from app.infrastructure.database.exception_mapper import exception_mapper
 from app.infrastructure.database.repositories.repo import SQLAlchemyRepo
@@ -138,6 +140,9 @@ class OrderRepo(SQLAlchemyRepo, IOrderRepo):
                     )
 
         new_order: Order = await self.session.get(Order, new_order_id)
+
+        print("GOODS", new_order.order_lines[0].goods.type is GoodsGoodsType.GOODS)
+        print("ORDER", new_order.order_lines[0].goods.type is GoodsType.GOODS)
 
         new_order.create()
         await self.session.flush()

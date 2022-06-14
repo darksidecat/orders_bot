@@ -1,4 +1,4 @@
-from app.domain.common.exceptions.base import AppException
+from app.domain.base.exceptions.base import AppException
 
 
 class GoodsException(AppException):

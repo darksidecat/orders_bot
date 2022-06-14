@@ -1,5 +1,5 @@
 from app.domain.access_levels.interfaces.persistence import IAccessLevelReader
-from app.domain.common.interfaces.uow import IUoW
+from app.domain.base.interfaces.uow import IUoW
 
 
 class IAccessLevelUoW(IUoW):

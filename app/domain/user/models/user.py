@@ -5,9 +5,9 @@ from attr import validators
 
 from app.domain.access_levels.models.access_level import AccessLevel
 from app.domain.access_levels.models.helper import Levels
-from app.domain.common.events.event import Event
-from app.domain.common.models.aggregate import Aggregate
-from app.domain.common.models.entity import entity
+from app.domain.base.events.event import Event
+from app.domain.base.models.aggregate import Aggregate
+from app.domain.base.models.entity import entity
 from app.domain.user import dto
 from app.domain.user.exceptions.user import (
     BlockedUserWithOtherRole,

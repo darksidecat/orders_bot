@@ -1,29 +1,16 @@
+from __future__ import annotations
+
 from typing import Optional
 from uuid import UUID
 
-from app.domain.base.dto.base import DTO, UNSET
-from app.domain.goods.models.goods_type import GoodsType
-
-
-class GoodsCreate(DTO):
-    name: str
-    type: GoodsType
-    parent_id: Optional[UUID]
-    sku: Optional[str]
-
-
-class GoodsPatch(DTO):
-    id: UUID
-    name: Optional[str] = UNSET
-    sku: Optional[str] = UNSET
-    is_active: Optional[bool] = UNSET
+from app.domain.base.dto.base import DTO
+from app.domain.goods.models.goods import GoodsType
 
 
 class Goods(DTO):
     id: UUID
     name: str
     type: GoodsType
-    parent_id: Optional[UUID]
     sku: Optional[str]
     is_active: bool
 

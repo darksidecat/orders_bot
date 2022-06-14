@@ -6,9 +6,9 @@ from uuid import UUID
 import attrs
 from attrs import validators
 
-from app.domain.common.events.event import Event
-from app.domain.common.models.aggregate import Aggregate
-from app.domain.common.models.entity import entity
+from app.domain.base.events.event import Event
+from app.domain.base.models.aggregate import Aggregate
+from app.domain.base.models.entity import entity
 from app.domain.market import dto
 
 

@@ -6,16 +6,16 @@ from uuid import UUID
 import attrs
 from attrs import validators
 
-from app.domain.common.events.event import Event
-from app.domain.common.models.aggregate import Aggregate
-from app.domain.common.models.entity import entity
-from app.domain.goods.models.goods import Goods
-from app.domain.market.models.market import Market
+from app.domain.base.events.event import Event
+from app.domain.base.models.aggregate import Aggregate
+from app.domain.base.models.entity import entity
 from app.domain.order import dto
+from app.domain.order.dto import User
 from app.domain.order.exceptions.order import OrderAlreadyConfirmed
 from app.domain.order.models.confirmed_status import ConfirmedStatus
-from app.domain.user.dto import User
-from app.domain.user.models.user import TelegramUser
+from app.domain.order.models.goods import Goods
+from app.domain.order.models.market import Market
+from app.domain.order.models.user import TelegramUser
 
 
 @entity
@@ -49,6 +49,7 @@ class Order(Aggregate):
     order_messages: List[OrderMessage] = attrs.field(factory=list)
 
     def create(self):
+        print(type(self.order_lines[0].goods.type))
         self.events.append(OrderCreated(dto.order.Order.from_orm(self)))
 
     def add_order_line(self, order_line: OrderLine):

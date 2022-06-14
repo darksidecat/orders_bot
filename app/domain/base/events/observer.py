@@ -1,8 +1,8 @@
 import functools
 from typing import Any, Awaitable, Callable, Dict, List, Type
 
-from app.domain.common.events.base import MiddlewareType, NextMiddlewareType
-from app.domain.common.events.event import Event
+from app.domain.base.events.base import MiddlewareType, NextMiddlewareType
+from app.domain.base.events.event import Event
 
 Handler = Callable[[Event, Dict[str, Any]], Awaitable[Any]]
 

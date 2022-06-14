@@ -3,7 +3,7 @@ from typing import Any, Callable
 
 from sqlalchemy.exc import IntegrityError
 
-from app.domain.common.exceptions import repo
+from app.domain.base.exceptions import repo
 
 
 def exception_mapper(func: Callable[..., Any]) -> Callable[..., Any]:

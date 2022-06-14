@@ -5,10 +5,11 @@ from uuid import UUID
 
 from pydantic import parse_obj_as
 
-from app.domain.common.dto.base import UNSET
-from app.domain.common.events.dispatcher import EventDispatcher
-from app.domain.common.exceptions.base import AccessDenied
+from app.domain.base.dto.base import UNSET
+from app.domain.base.events.dispatcher import EventDispatcher
+from app.domain.base.exceptions.base import AccessDenied
 from app.domain.goods import dto
+from app.domain.goods.access_policy import GoodsAccessPolicy
 from app.domain.goods.exceptions.goods import (
     CantDeleteWithChildren,
     GoodsAlreadyExists,
@@ -16,7 +17,6 @@ from app.domain.goods.exceptions.goods import (
 )
 from app.domain.goods.interfaces.uow import IGoodsUoW
 from app.domain.goods.models.goods import Goods
-from app.domain.user.access_policy import AccessPolicy
 
 logger = logging.getLogger(__name__)
 
@@ -109,7 +109,7 @@ class GoodsService:
     def __init__(
         self,
         uow: IGoodsUoW,
-        access_policy: AccessPolicy,
+        access_policy: GoodsAccessPolicy,
         event_dispatcher: EventDispatcher,
     ) -> None:
         self.uow = uow
