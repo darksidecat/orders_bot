@@ -11,15 +11,11 @@ from app.domain.common.exceptions.base import AccessDenied
 from app.domain.goods import dto
 from app.domain.goods.exceptions.goods import (
     CantDeleteWithChildren,
-    CantMakeActiveWithInactiveParent,
-    CantMakeInactiveWithActiveChildren,
-    CantSetFolderSKU,
     GoodsAlreadyExists,
     GoodsNotExists,
 )
 from app.domain.goods.interfaces.uow import IGoodsUoW
 from app.domain.goods.models.goods import Goods
-from app.domain.goods.models.goods_type import GoodsType
 from app.domain.user.access_policy import AccessPolicy
 
 logger = logging.getLogger(__name__)
@@ -42,8 +38,12 @@ class AddGoods(GoodsUseCase):
         Raises:
             GoodsAlreadyExists - if user already exist
         """
+        try:
+            parent = await self.uow.goods.goods_by_id(goods.parent_id)
+        except GoodsNotExists:
+            parent = None
         goods = Goods.create(
-            name=goods.name, type=goods.type, parent_id=goods.parent_id, sku=goods.sku
+            name=goods.name, type=goods.type, parent=parent, sku=goods.sku
         )
 
         try:
@@ -94,34 +94,12 @@ class PatchGoods(GoodsUseCase):
         goods = await self.uow.goods.goods_by_id(patch_goods_data.id)
 
         if patch_goods_data.name is not UNSET:
-            goods.name = patch_goods_data.name
-        if patch_goods_data.parent_id is not UNSET:
-            goods.parent_id = patch_goods_data.parent_id
+            goods.change_name(patch_goods_data.name)
         if patch_goods_data.sku is not UNSET:
-            if goods.type == GoodsType.FOLDER:
-                raise CantSetFolderSKU()
-            goods.sku = patch_goods_data.sku
+            goods.change_sku(patch_goods_data.sku)
 
         if patch_goods_data.is_active is not UNSET:
-            if patch_goods_data.is_active is False:
-                children = await self.uow.goods_reader.goods_in_folder(
-                    parent_id=goods.id, only_active=False
-                )
-                children_statuses = (
-                    [child.is_active for child in children] if children else []
-                )
-                if True in children_statuses:
-                    raise CantMakeInactiveWithActiveChildren()
-
-            else:
-                try:
-                    parent = await self.uow.goods_reader.goods_by_id(goods.parent_id)
-                    if parent.is_active is False:
-                        raise CantMakeActiveWithInactiveParent()
-                except GoodsNotExists:
-                    pass  # parent is not exists so it's ok
-
-            goods.is_active = patch_goods_data.is_active
+            goods.change_active_status(patch_goods_data.is_active)
 
         await self.uow.goods.edit_goods(goods=goods)
         await self.uow.commit()

@@ -28,7 +28,7 @@ prepare-volumes:
 
 .PHONY: dev-docker
 dev-docker:
-	docker compose -f=docker-compose-dev.yml --env-file=.env up
+	docker compose -f=docker-compose-dev.yml --env-file=.env.dev up
 
 .PHONY: dev-alembic
 dev-alembic:
@@ -37,7 +37,7 @@ dev-alembic:
 
 .PHONY: dev-bot
 dev-bot:
-	$(call setup_env, .env)
+	$(call setup_env, .env.dev)
 	python -m app.tgbot
 
 .PHONY: test-docker

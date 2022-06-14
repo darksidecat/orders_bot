@@ -57,15 +57,20 @@ def map_goods():
             "parent": relationship(
                 Goods,
                 remote_side=[goods_table.c.id, goods_table.c.type],
+                back_populates="children",
                 passive_deletes="all",
-                back_populates="childrens",
-                lazy="selectin",
+                lazy="joined",
+                join_depth=1,
+                uselist=False,
             ),
-            "childrens": relationship(
+            "children": relationship(
                 Goods,
                 remote_side=[goods_table.c.parent_id, goods_table.c.parent_type],
-                lazy="selectin",
+                back_populates="parent",
                 passive_deletes="all",
+                lazy="joined",
+                join_depth=1,
+                uselist=True,
             ),
         },
     )

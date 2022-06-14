@@ -38,7 +38,7 @@ class GoodsReader(SQLAlchemyRepo, IGoodsReader):
             query = query.where(Goods.is_active.is_(True))
 
         result = await self.session.execute(query)
-        goods = result.scalars().all()
+        goods = result.scalars().unique().all()
 
         return parse_obj_as(List[dto.Goods], goods)
 
@@ -56,7 +56,6 @@ class GoodsRepo(SQLAlchemyRepo, IGoodsRepo):
     @exception_mapper
     async def _goods(self, goods_id: UUID) -> Goods:
         goods = await self.session.get(Goods, goods_id)
-
         if not goods:
             raise GoodsNotExists
 

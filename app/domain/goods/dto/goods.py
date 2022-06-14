@@ -15,7 +15,6 @@ class GoodsCreate(DTO):
 class GoodsPatch(DTO):
     id: UUID
     name: Optional[str] = UNSET
-    parent_id: Optional[UUID] = UNSET
     sku: Optional[str] = UNSET
     is_active: Optional[bool] = UNSET
 
