@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import uuid
-from enum import Enum
 from typing import List, Optional
 from uuid import UUID
 
@@ -9,11 +8,7 @@ import attrs
 from attrs import validators
 
 from app.domain.base.models.entity import entity
-
-
-class GoodsType(Enum):
-    GOODS = "GOODS"
-    FOLDER = "FOLDER"
+from app.domain.goods.models.goods_type import GoodsType
 
 
 @entity

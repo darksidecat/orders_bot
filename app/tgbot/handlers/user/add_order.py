@@ -17,11 +17,10 @@ from aiogram_dialog.widgets.kbd import (
 from aiogram_dialog.widgets.managed import ManagedWidgetAdapter
 from aiogram_dialog.widgets.text import Const, Format, Multi
 
-from app.domain.goods.models.goods_type import GoodsType as GoodsAggregateGoodsType
+from app.domain.goods.models.goods_type import GoodsType
 from app.domain.goods.usecases.goods import GoodsService
 from app.domain.market.usecases import MarketService
 from app.domain.order.dto import OrderCreate, OrderLineCreate
-from app.domain.order.models.goods import GoodsType
 from app.domain.order.usecases.order import OrderService
 from app.tgbot import states
 from app.tgbot.constants import (
@@ -65,7 +64,7 @@ async def go_to_next_level(
 
     if (
         await goods_service.get_goods_by_id(UUID(item_id))
-    ).type == GoodsAggregateGoodsType.GOODS:
+    ).type == GoodsType.GOODS:
         manager.current_context().dialog_data[SELECTED_GOODS] = item_id
         await manager.dialog().next()
     else:
