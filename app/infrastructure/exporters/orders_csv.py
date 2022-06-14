@@ -8,7 +8,13 @@ from app.domain.order.dto.order import Order
 def export_orders_to_csv(orders: list[Order]) -> bytes:
     # create csv writer
     output = io.StringIO()
-    csv_writer = csv.writer(output)
+    csv_writer = csv.writer(
+        output,
+        delimiter="\t",
+        quotechar='"',
+        quoting=csv.QUOTE_ALL,
+        lineterminator="\r\n",
+    )
     # write header
     csv_writer.writerow(
         [

@@ -1,9 +1,10 @@
+import datetime
 import math
 from typing import Optional
 
 from aiogram.types import BufferedInputFile, CallbackQuery, InputFile
 from aiogram.utils.text_decorations import html_decoration as fmt
-from aiogram_dialog import Dialog, DialogManager, Window
+from aiogram_dialog import Dialog, DialogManager, ShowMode, Window
 from aiogram_dialog.widgets.kbd import Back, Button, Cancel, Next, Row
 from aiogram_dialog.widgets.text import Const, Format
 
@@ -59,7 +60,14 @@ async def import_orders_csv(
     )
 
     csv = export_orders_to_csv(orders)
-    await query.message.answer_document(BufferedInputFile(csv, filename="orders.csv"))
+    await query.message.answer_document(
+        BufferedInputFile(
+            csv,
+            filename=f"{history_level}-{datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.csv",
+        )
+    )
+    manager.show_mode = ShowMode.SEND
+    await manager.dialog().show()
 
 
 async def get_orders(
