@@ -10,7 +10,7 @@ from app.domain.order.exceptions.order import OrderAlreadyConfirmed
 from app.domain.order.models.confirmed_status import ConfirmedStatus
 from app.domain.order.usecases.order import OrderService
 from app.domain.user.dto import User
-from app.tgbot.handlers.user.common import format_order_message
+from app.tgbot.handlers.message_templates import format_order_message
 
 logger = logging.getLogger(__name__)
 
@@ -40,34 +40,34 @@ def confirm_order_keyboard(order_id: UUID):
     return keyboard
 
 
-async def confirm_order(
+async def confirm_order_usecase(
     query: CallbackQuery,
-    callback_data: OrderConfirm,
     order_service: OrderService,
     user: User,
     bot: Bot,
+    order_id: UUID,
+    result: bool,
+    delete_reply_markup: bool,
 ):
-
-    confirmed_status = (
-        ConfirmedStatus.YES if callback_data.result else ConfirmedStatus.NO
-    )
+    confirmed_status = ConfirmedStatus.YES if result else ConfirmedStatus.NO
 
     try:
         await order_service.change_confirm_status(
-            callback_data.order_id, confirmed_status=confirmed_status, confirmed_by=user
+            order_id, confirmed_status=confirmed_status, confirmed_by=user
         )
     except OrderAlreadyConfirmed:
         await query.answer("Order already confirmed")
         try:
-            await query.message.edit_reply_markup(reply_markup=None)
+            if delete_reply_markup:
+                await query.message.edit_reply_markup(reply_markup=None)
         except TelegramAPIError:
             #  If reply_markup is already deleted
             pass
-    if callback_data.result:
+    if result:
         await query.answer("Order confirmed")
     else:
         await query.answer("Order canceled")
-    order = await order_service.get_order_by_id(callback_data.order_id)
+    order = await order_service.get_order_by_id(order_id)
 
     for message in order.order_messages:
         try:
@@ -80,6 +80,24 @@ async def confirm_order(
         except TelegramAPIError as e:
             logger.error(e)
             continue
+
+
+async def confirm_order(
+    query: CallbackQuery,
+    callback_data: OrderConfirm,
+    order_service: OrderService,
+    user: User,
+    bot: Bot,
+):
+    await confirm_order_usecase(
+        query=query,
+        order_service=order_service,
+        user=user,
+        bot=bot,
+        order_id=callback_data.order_id,
+        result=callback_data.result,
+        delete_reply_markup=True,
+    )
 
 
 def register_handlers(router: Router):

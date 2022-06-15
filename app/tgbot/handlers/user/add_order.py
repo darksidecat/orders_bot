@@ -42,7 +42,7 @@ from app.tgbot.handlers.admin.goods.edit import (
 from app.tgbot.handlers.admin.market.edit import save_selected_market_id
 from app.tgbot.handlers.admin.user.common import get_user_data
 from app.tgbot.handlers.dialogs.common import enable_send_mode, when_not
-from app.tgbot.handlers.user.common import format_order_message
+from app.tgbot.handlers.message_templates import format_order_message
 
 
 async def get_active_goods(

@@ -14,7 +14,7 @@ from app.domain.user.access_policy import AllowedUserAccessPolicy
 from app.domain.user.dto import User
 from app.domain.user.usecases.user import UserService
 from app.tgbot.handlers.chief.order_confirm import confirm_order_keyboard
-from app.tgbot.handlers.user.common import format_order_message
+from app.tgbot.handlers.message_templates import format_order_message
 
 logger = logging.getLogger(__name__)
 
