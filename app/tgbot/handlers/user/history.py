@@ -163,7 +163,7 @@ async def orders_getter(
         "result": message,
         "has_next": has_next,
         "has_prev": offset > 0,
-        "orders_for_confirmation": orders_for_confirmation,
+        ORDERS_FOR_CONFIRMATION: orders_for_confirmation,
     }
 
 
@@ -245,7 +245,7 @@ history_dialog = Dialog(
         Row(
             Button(Const("✅ Confirm"), id="confirm_order", on_click=confirm_order),
             Button(Const("❌ Cancel"), id="cancel_order", on_click=confirm_order),
-            when="orders_for_confirmation",
+            when=ORDERS_FOR_CONFIRMATION,
         ),
         # add 2 buttons for previous and next page
         Row(
