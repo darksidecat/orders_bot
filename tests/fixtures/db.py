@@ -1,3 +1,5 @@
+import asyncio
+
 import alembic
 import alembic.config
 from _pytest.fixtures import fixture
@@ -23,8 +25,10 @@ def session_factory(config):
 
 
 @fixture(scope="session")
-async def db_wipe(session_factory):
-    await wipe_db(session_factory=session_factory)
+def db_wipe(session_factory):
+    loop = asyncio.get_event_loop_policy().new_event_loop()
+    loop.run_until_complete(wipe_db(session_factory))
+    loop.close()
 
 
 @fixture(scope="session", autouse=True)
