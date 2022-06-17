@@ -7,8 +7,7 @@ from app.domain.base.dto.base import DTO
 from app.domain.order.dto.goods import Goods
 from app.domain.order.dto.market import Market
 from app.domain.order.dto.user import User
-from app.domain.order.models.confirmed_status import ConfirmedStatus
-from app.domain.order.models.goods import GoodsType
+from app.domain.order.value_objects import ConfirmedStatus, GoodsType
 
 
 class OrderLineCreate(DTO):

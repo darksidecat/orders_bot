@@ -9,7 +9,7 @@ from app.domain.order.access_policy import OrderAccessPolicy
 from app.domain.order.dto import User
 from app.domain.order.exceptions.order import OrderNotExists
 from app.domain.order.interfaces.uow import IOrderUoW
-from app.domain.order.models.confirmed_status import ConfirmedStatus
+from app.domain.order.value_objects.confirmed_status import ConfirmedStatus
 from app.domain.order.models.order import Order, OrderMessage
 
 logger = logging.getLogger(__name__)

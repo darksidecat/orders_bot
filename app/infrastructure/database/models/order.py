@@ -7,7 +7,7 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
 from app.domain.order import models
-from app.domain.order.models.confirmed_status import ConfirmedStatus
+from app.domain.order.value_objects.confirmed_status import ConfirmedStatus
 from app.domain.order.models.goods import GoodsType
 from app.domain.order.models.order import Order, OrderLine, OrderMessage
 

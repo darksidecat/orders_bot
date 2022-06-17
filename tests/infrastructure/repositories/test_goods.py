@@ -61,7 +61,7 @@ class TestGoodsReader:
         goods = await goods_reader.goods_in_folder(parent_id=None, only_active=False)
         assert [g.id for g in goods] == [folder1.id, goods1.id]
 
-        goods1.is_active = False
+        goods1.change_active_status(False)
         await goods_repo.session.commit()
         goods = await goods_reader.goods_in_folder(parent_id=None, only_active=True)
         assert [g.id for g in goods] == [folder1.id]
@@ -109,7 +109,7 @@ class TestGoodsRepo:
 
     # ignore identity key conflict
     @pytest.mark.filterwarnings("ignore::sqlalchemy.exc.SAWarning")
-    async def test_add_goods_exception(self, goods_repo):
+    async def test_add_goods_duplicate_id_exception(self, goods_repo):
         goods = await goods_repo.add_goods(
             Goods.create(name="GoodsName", type=GoodsType.GOODS, sku="123")
         )
@@ -204,8 +204,8 @@ class TestGoodsRepo:
         )
         await goods_repo.session.commit()
 
-        goods_in_db = await goods_repo.session.get(Goods, goods.id)
-        goods_in_db.name = "GoodsNameChanged"
+        goods_in_db: Goods = await goods_repo.session.get(Goods, goods.id)
+        goods_in_db.change_name("GoodsNameChanged")
         await goods_repo.edit_goods(goods_in_db)
         await goods_repo.session.commit()
 

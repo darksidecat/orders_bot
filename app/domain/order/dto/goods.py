@@ -4,7 +4,7 @@ from typing import Optional
 from uuid import UUID
 
 from app.domain.base.dto.base import DTO
-from app.domain.order.models.goods import GoodsType
+from app.domain.order.value_objects import GoodsType
 
 
 class Goods(DTO):

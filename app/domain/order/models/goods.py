@@ -8,7 +8,7 @@ import attrs
 from attrs import validators
 
 from app.domain.base.models.entity import entity
-from app.domain.goods.models.goods_type import GoodsType
+from app.domain.order.value_objects import GoodsType
 
 
 @entity
