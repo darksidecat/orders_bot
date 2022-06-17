@@ -55,7 +55,7 @@ async def db_session(session_factory, config) -> AsyncSession:
         await session.begin_nested()
 
         @event.listens_for(session.sync_session, "after_transaction_end")
-        def reopen_savepoint(session, transaction):
+        def reopen_nested_transaction(session, transaction):
             if transaction.nested and not transaction._parent.nested:
                 session.begin_nested()
 
