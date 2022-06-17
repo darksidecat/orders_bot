@@ -46,10 +46,10 @@ class TestOrderRepo:
         await order_repo.session.delete(order)
         await order_repo.session.commit()
 
+        order_repo.session.expunge_all()
+
         assert await order_repo.session.get(Order, order.id) is None
-        assert (
-            await order_repo.session.get(OrderLine, order.order_lines[0].id) is not None
-        )
+        assert await order_repo.session.get(OrderLine, order.order_lines[0].id) is None
         assert await order_repo.session.get(Market, market.id) is not None
         assert await order_repo.session.get(Market, market2.id) is not None
         assert await order_repo.session.get(Goods, goods.id) is not None

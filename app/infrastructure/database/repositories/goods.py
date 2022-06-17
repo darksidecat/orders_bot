@@ -9,6 +9,7 @@ from sqlalchemy.exc import IntegrityError
 from app.domain.goods import dto
 from app.domain.goods.exceptions.goods import (
     CantDeleteWithChildren,
+    CantDeleteWithOrders,
     CantSetSKUForFolder,
     GoodsAlreadyExists,
     GoodsMustHaveSKU,
@@ -68,9 +69,9 @@ class GoodsRepo(SQLAlchemyRepo, IGoodsRepo):
             await self.session.flush()
         except IntegrityError as err:
             if "goods_pkey" in str(err):
-                raise GoodsAlreadyExists
+                raise GoodsAlreadyExists()
             if "fk_goods_goods" in str(err) or "goods_parent_type_check" in str(err):
-                raise GoodsTypeCantBeParent
+                raise GoodsTypeCantBeParent()
             if "ck_folder_sku_null" in str(err):
                 raise CantSetSKUForFolder()
             if "ck_goods_sku_not_null" in str(err):
@@ -89,8 +90,12 @@ class GoodsRepo(SQLAlchemyRepo, IGoodsRepo):
             goods = await self._goods(goods_id)
             await self.session.delete(goods)
             await self.session.flush()
-        except IntegrityError:
-            raise CantDeleteWithChildren()
+        except IntegrityError as err:
+            if "fk_order_line_goods" in str(err):
+                raise CantDeleteWithOrders()
+            if "fk_goods_goods" in str(err):
+                raise CantDeleteWithChildren()
+            raise
 
     @exception_mapper
     async def edit_goods(self, goods: Goods) -> Goods:
@@ -98,5 +103,4 @@ class GoodsRepo(SQLAlchemyRepo, IGoodsRepo):
             await self.session.flush()
         except IntegrityError:
             raise GoodsAlreadyExists
-
         return goods

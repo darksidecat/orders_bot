@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 class MarketReader(SQLAlchemyRepo, IMarketReader):
     @exception_mapper
-    async def all_markets(self, only_active: bool) -> List[dto.Market]:
+    async def all_markets(self, only_active: bool = False) -> List[dto.Market]:
         query = select(Market).order_by(Market.name)
 
         if only_active:
@@ -73,8 +73,10 @@ class MarketRepo(SQLAlchemyRepo, IMarketRepo):
             market = await self._market(market_id)
             await self.session.delete(market)
             await self.session.flush()
-        except IntegrityError:
-            raise CantDeleteWithOrders  # ToDo add check for market not exists
+        except IntegrityError as err:
+            if "order_recipient_market_id_fkey" in str(err):
+                raise CantDeleteWithOrders()
+            raise
 
     @exception_mapper
     async def edit_market(self, market: Market) -> Market:

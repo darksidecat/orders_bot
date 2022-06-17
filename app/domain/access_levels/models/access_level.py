@@ -15,3 +15,6 @@ class LevelName(Enum):
 class AccessLevel:
     id: int
     name: LevelName
+
+    def __eq__(self, other):
+        return self.id == other.id and self.name == other.name

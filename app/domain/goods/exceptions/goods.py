@@ -39,3 +39,7 @@ class CantSetSKUForFolder(GoodsException):
 
 class GoodsMustHaveSKU(GoodsException):
     """Goods must have SKU"""
+
+
+class CantDeleteWithOrders(GoodsException):
+    """Can't delete with orders"""

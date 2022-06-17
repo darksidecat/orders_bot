@@ -7,8 +7,8 @@ from aiogram.exceptions import TelegramAPIError
 from aiogram.types import CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup
 
 from app.domain.order.exceptions.order import OrderAlreadyConfirmed
-from app.domain.order.value_objects.confirmed_status import ConfirmedStatus
 from app.domain.order.usecases.order import OrderService
+from app.domain.order.value_objects.confirmed_status import ConfirmedStatus
 from app.domain.user.dto import User
 from app.tgbot.handlers.message_templates import format_order_message
 

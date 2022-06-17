@@ -22,3 +22,15 @@ def id_to_access_levels(level_ids: Iterable[int]):
         )
     else:
         return list(levels_map[level] for level in level_ids)
+
+
+def name_to_access_levels(level_names: Iterable[LevelName]):
+    levels_map = {level.value.name: level.value for level in Levels}
+
+    if not set(level_names).issubset(levels_map):
+        not_found_levels = set(level_names).difference(levels_map)
+        raise AccessLevelNotExist(
+            f"Access levels with names: {not_found_levels} not found"
+        )
+    else:
+        return list(levels_map[level] for level in level_names)

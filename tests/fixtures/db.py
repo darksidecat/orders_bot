@@ -6,9 +6,8 @@ from sqlalchemy import event
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import clear_mappers
 
-from app.infrastructure.database.db import sa_sessionmaker, make_connection_string
+from app.infrastructure.database.db import make_connection_string, sa_sessionmaker
 from app.infrastructure.database.models import map_tables
-
 
 __all__ = [
     "session_factory",

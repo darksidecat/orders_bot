@@ -18,5 +18,3 @@ def event_loop():
 @fixture(scope="session")
 def config():
     return load_config(env_file=".env.test")
-
-

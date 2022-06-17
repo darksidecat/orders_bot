@@ -12,10 +12,10 @@ from app.domain.base.models.entity import entity
 from app.domain.order import dto
 from app.domain.order.dto import User
 from app.domain.order.exceptions.order import OrderAlreadyConfirmed
-from app.domain.order.value_objects.confirmed_status import ConfirmedStatus
 from app.domain.order.models.goods import Goods
 from app.domain.order.models.market import Market
 from app.domain.order.models.user import TelegramUser
+from app.domain.order.value_objects.confirmed_status import ConfirmedStatus
 
 
 @entity

@@ -1,10 +1,19 @@
 from _pytest.fixtures import fixture
 
-from app.infrastructure.database.repositories import GoodsReader, GoodsRepo, OrderRepo, OrderReader, MarketRepo, \
-    MarketReader, UserRepo, UserReader
-
+from app.infrastructure.database.repositories import (
+    AccessLevelReader,
+    GoodsReader,
+    GoodsRepo,
+    MarketReader,
+    MarketRepo,
+    OrderReader,
+    OrderRepo,
+    UserReader,
+    UserRepo,
+)
 
 __all__ = [
+    "access_level_reader",
     "goods_reader",
     "goods_repo",
     "order_repo",
@@ -54,3 +63,8 @@ def user_repo(db_session):
 @fixture
 def user_reader(db_session):
     return UserReader(session=db_session)
+
+
+@fixture
+def access_level_reader(db_session):
+    return AccessLevelReader(session=db_session)

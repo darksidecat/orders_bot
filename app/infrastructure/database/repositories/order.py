@@ -14,8 +14,8 @@ from app.domain.order.exceptions.order import (
     OrderNotExists,
 )
 from app.domain.order.interfaces.persistence import IOrderReader, IOrderRepo
-from app.domain.order.value_objects.confirmed_status import ConfirmedStatus
 from app.domain.order.models.order import Order, OrderLine
+from app.domain.order.value_objects.confirmed_status import ConfirmedStatus
 from app.infrastructure.database.exception_mapper import exception_mapper
 from app.infrastructure.database.repositories.repo import SQLAlchemyRepo
 
