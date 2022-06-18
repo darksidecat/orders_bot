@@ -2,8 +2,8 @@ import asyncio
 
 import alembic
 import alembic.config
-from _pytest.fixtures import fixture
 from alembic import command
+from pytest import fixture
 from sqlalchemy import event
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import clear_mappers

@@ -1,4 +1,4 @@
-from _pytest.fixtures import fixture
+from pytest import fixture
 
 from app.infrastructure.database.repositories import (
     AccessLevelReader,
