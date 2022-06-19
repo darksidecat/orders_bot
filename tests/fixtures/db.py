@@ -21,7 +21,7 @@ __all__ = [
 
 @fixture(scope="session")
 def session_factory(config):
-    return sa_sessionmaker(config.db)
+    return sa_sessionmaker(config.db, echo=True)
 
 
 @fixture(scope="session")
@@ -51,16 +51,19 @@ async def db_session(session_factory, config) -> AsyncSession:
         make_connection_string(db=config.db)
     ).connect() as connect:
         transaction = await connect.begin()
-        session: AsyncSession = session_factory(bind=connect)
-        await session.begin_nested()
+        async_session: AsyncSession = session_factory(bind=connect)
+        await async_session.begin_nested()
 
-        @event.listens_for(session.sync_session, "after_transaction_end")
+        @event.listens_for(async_session.sync_session, "after_transaction_end")
         def reopen_nested_transaction(session, transaction):
-            if transaction.nested and not transaction._parent.nested:
-                session.begin_nested()
+            if connect.closed:
+                return
 
-        yield session
-        await session.close()
+            if not connect.in_nested_transaction():
+                connect.sync_connection.begin_nested()
+
+        yield async_session
+        await async_session.close()
         if transaction.is_active:
             await transaction.rollback()
 

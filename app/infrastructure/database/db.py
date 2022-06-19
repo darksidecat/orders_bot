@@ -21,7 +21,7 @@ def sa_sessionmaker(db: DB, echo: bool = False) -> sessionmaker:
     :return: sessionmaker
     :rtype: sqlalchemy.orm.sessionmaker
     """
-    engine = create_async_engine(make_connection_string(db), echo=True)
+    engine = create_async_engine(make_connection_string(db), echo=echo)
     return sessionmaker(
         bind=engine,
         expire_on_commit=False,
