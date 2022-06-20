@@ -67,14 +67,16 @@ class GoodsRepo(SQLAlchemyRepo, IGoodsRepo):
         try:
             self.session.add(goods)
             await self.session.flush()
-        except IntegrityError as err:
-            if "goods_pkey" in str(err):
+        except IntegrityError as ecx:
+            if "pk_goods" in str(ecx):
                 raise GoodsAlreadyExists()
-            if "fk_goods_goods" in str(err) or "goods_parent_type_check" in str(err):
+            if "fk_goods_parent_id_goods" in str(
+                ecx
+            ) or "ck_goods_parent_type_is_folder" in str(ecx):
                 raise GoodsTypeCantBeParent()
-            if "ck_folder_sku_null" in str(err):
+            if "ck_goods_folder_sku_null" in str(ecx):
                 raise CantSetSKUForFolder()
-            if "ck_goods_sku_not_null" in str(err):
+            if "ck_goods_goods_sku_not_null" in str(ecx):
                 raise GoodsMustHaveSKU()
             raise
 
@@ -91,9 +93,9 @@ class GoodsRepo(SQLAlchemyRepo, IGoodsRepo):
             await self.session.delete(goods)
             await self.session.flush()
         except IntegrityError as err:
-            if "fk_order_line_goods" in str(err):
+            if "fk_order_line_goods_id_goods" in str(err):
                 raise CantDeleteWithOrders()
-            if "fk_goods_goods" in str(err):
+            if "fk_goods_parent_id_goods" in str(err):
                 raise CantDeleteWithChildren()
             raise
 

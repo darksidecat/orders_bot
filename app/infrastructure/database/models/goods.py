@@ -31,21 +31,20 @@ goods_table = Table(
     ForeignKeyConstraint(
         ["parent_id", "parent_type"],
         ["goods.id", "goods.type"],
-        name="fk_goods_goods",
         ondelete="RESTRICT",
         onupdate="CASCADE",
     ),
     # check constraint if type is GOODS then sku is required otherwise must be null
     CheckConstraint(
         "(type in ('GOODS') AND sku IS NOT NULL) or type in ('FOLDER')",
-        name="ck_goods_sku_not_null",
+        name="goods_sku_not_null",
     ),
     CheckConstraint(
         "(type in ('FOLDER') AND sku IS NULL) or type in ('GOODS')",
-        name="ck_folder_sku_null",
+        name="folder_sku_null",
     ),
-    CheckConstraint("parent_type not in ('GOODS')"),
-    UniqueConstraint("id", "type", name="uq_goods_id_type"),
+    CheckConstraint("parent_type in ('FOLDER')", name="parent_type_is_folder"),
+    UniqueConstraint("id", "type"),
 )
 
 

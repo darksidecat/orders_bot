@@ -3,6 +3,7 @@ import asyncio
 import alembic
 import alembic.config
 from alembic import command
+from alembic.script import ScriptDirectory
 from pytest import fixture
 from sqlalchemy import event
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
@@ -33,13 +34,21 @@ def db_wipe(session_factory):
 
 @fixture(scope="session", autouse=True)
 def test_db(session_factory, config, db_wipe) -> None:
-    clear_mappers()
     cfg = alembic.config.Config()
     cfg.set_main_option("script_location", "app/infrastructure/database/alembic")
     cfg.set_main_option(
         "sqlalchemy.url", make_connection_string(config.db, async_fallback=True)
     )
-    command.upgrade(cfg, "head")
+
+    revisions_dir = ScriptDirectory.from_config(cfg)
+
+    # Get & sort migrations, from first to last
+    revisions = list(revisions_dir.walk_revisions("base", "heads"))
+    revisions.reverse()
+    for revision in revisions:
+        command.upgrade(cfg, revision.revision)
+        command.downgrade(cfg, revision.down_revision or "-1")
+        command.upgrade(cfg, revision.revision)
 
 
 @fixture(scope="function")

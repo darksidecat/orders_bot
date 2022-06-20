@@ -45,11 +45,10 @@ order_line_table = Table(
     ForeignKeyConstraint(
         ["goods_id", "goods_type"],
         ["goods.id", "goods.type"],
-        name="fk_order_line_goods",
         ondelete="RESTRICT",
         onupdate="CASCADE",
     ),
-    CheckConstraint("goods_type in ('GOODS')"),
+    CheckConstraint("goods_type in ('GOODS')", name="goods_type_check"),
 )
 
 order_table = Table(

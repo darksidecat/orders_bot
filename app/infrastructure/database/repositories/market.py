@@ -74,7 +74,7 @@ class MarketRepo(SQLAlchemyRepo, IMarketRepo):
             await self.session.delete(market)
             await self.session.flush()
         except IntegrityError as err:
-            if "order_recipient_market_id_fkey" in str(err):
+            if "fk_order_recipient_market_id_market" in str(err):
                 raise CantDeleteWithOrders()
             raise
 

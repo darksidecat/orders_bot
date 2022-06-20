@@ -2,6 +2,7 @@ from logging.config import fileConfig
 
 from alembic import context
 from sqlalchemy import engine_from_config, pool
+from sqlalchemy.orm import clear_mappers
 
 from app.config import load_config
 from app.infrastructure.database.db import make_connection_string
@@ -26,6 +27,7 @@ if config.config_file_name is not None:
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
 target_metadata = mapper_registry.metadata
+clear_mappers()
 map_tables()
 
 # other values from the config, defined by the needs of env.py,
