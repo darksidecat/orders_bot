@@ -18,14 +18,12 @@ from app.domain.goods.exceptions.goods import (
 )
 from app.domain.goods.interfaces.persistence import IGoodsReader, IGoodsRepo
 from app.domain.goods.models.goods import Goods
-from app.infrastructure.database.exception_mapper import exception_mapper
 from app.infrastructure.database.repositories.repo import SQLAlchemyRepo
 
 logger = logging.getLogger(__name__)
 
 
 class GoodsReader(SQLAlchemyRepo, IGoodsReader):
-    @exception_mapper
     async def goods_in_folder(
         self, parent_id: Optional[UUID], only_active: bool
     ) -> List[dto.Goods]:
@@ -43,50 +41,53 @@ class GoodsReader(SQLAlchemyRepo, IGoodsReader):
 
         return parse_obj_as(List[dto.Goods], goods)
 
-    @exception_mapper
     async def goods_by_id(self, goods_id: UUID) -> dto.Goods:
         goods = await self.session.get(Goods, goods_id)
 
         if not goods:
-            raise GoodsNotExists
+            raise GoodsNotExists(f"Goods with id {goods_id} not exists")
 
         return dto.Goods.from_orm(goods)
 
 
 class GoodsRepo(SQLAlchemyRepo, IGoodsRepo):
-    @exception_mapper
     async def _goods(self, goods_id: UUID) -> Goods:
         goods = await self.session.get(Goods, goods_id)
         if not goods:
-            raise GoodsNotExists
+            raise GoodsNotExists(f"Goods with id {goods_id} not exists")
 
         return goods
 
-    @exception_mapper
     async def add_goods(self, goods: Goods) -> Goods:
         try:
             self.session.add(goods)
             await self.session.flush()
-        except IntegrityError as ecx:
-            if "pk_goods" in str(ecx):
-                raise GoodsAlreadyExists()
+        except IntegrityError as err:
+            if "pk_goods" in str(err):
+                raise GoodsAlreadyExists(
+                    f"Goods with id {goods.id} already exists"
+                ) from err
             if "fk_goods_parent_id_goods" in str(
-                ecx
-            ) or "ck_goods_parent_type_is_folder" in str(ecx):
-                raise GoodsTypeCantBeParent()
-            if "ck_goods_folder_sku_null" in str(ecx):
-                raise CantSetSKUForFolder()
-            if "ck_goods_goods_sku_not_null" in str(ecx):
-                raise GoodsMustHaveSKU()
+                err
+            ) or "ck_goods_parent_type_is_folder" in str(err):
+                raise GoodsTypeCantBeParent(
+                    f"Goods with id {goods.id} and {goods.type} can't be parent"
+                ) from err
+            if "ck_goods_folder_sku_null" in str(err):
+                raise CantSetSKUForFolder(
+                    f"Goods id={goods.id} with {goods.type} type can't have SKU"
+                ) from err
+            if "ck_goods_goods_sku_not_null" in str(err):
+                raise GoodsMustHaveSKU(
+                    f"Goods id={goods.id} with {goods.type} type must have SKU"
+                ) from err
             raise
 
         return goods
 
-    @exception_mapper
     async def goods_by_id(self, user_id: UUID) -> Goods:
         return await self._goods(user_id)
 
-    @exception_mapper
     async def delete_goods(self, goods_id: UUID) -> None:
         try:
             goods = await self._goods(goods_id)
@@ -94,15 +95,21 @@ class GoodsRepo(SQLAlchemyRepo, IGoodsRepo):
             await self.session.flush()
         except IntegrityError as err:
             if "fk_order_line_goods_id_goods" in str(err):
-                raise CantDeleteWithOrders()
+                raise CantDeleteWithOrders(
+                    f"Goods with id {goods_id} can't be deleted as it has orders"
+                ) from err
             if "fk_goods_parent_id_goods" in str(err):
-                raise CantDeleteWithChildren()
+                raise CantDeleteWithChildren(
+                    f"Goods with id {goods_id} can't be deleted as it has children"
+                ) from err
             raise
 
-    @exception_mapper
     async def edit_goods(self, goods: Goods) -> Goods:
+        goods_id = goods.id  # copy goods id to access in case of exception
         try:
             await self.session.flush()
-        except IntegrityError:
-            raise GoodsAlreadyExists
+        except IntegrityError as err:
+            raise GoodsAlreadyExists(
+                f"Goods with id {goods_id} already exists"
+            ) from err
         return goods

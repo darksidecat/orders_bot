@@ -15,14 +15,12 @@ from app.domain.user.exceptions.user import (
 )
 from app.domain.user.interfaces.persistence import IUserReader, IUserRepo
 from app.domain.user.models.user import TelegramUser
-from app.infrastructure.database.exception_mapper import exception_mapper
 from app.infrastructure.database.repositories.repo import SQLAlchemyRepo
 
 logger = logging.getLogger(__name__)
 
 
 class UserReader(SQLAlchemyRepo, IUserReader):
-    @exception_mapper
     async def all_users(self) -> List[dto.User]:
         query = select(TelegramUser)
 
@@ -41,27 +39,24 @@ class UserReader(SQLAlchemyRepo, IUserReader):
 
         return parse_obj_as(List[dto.User], users)
 
-    @exception_mapper
     async def user_by_id(self, user_id: int) -> dto.User:
         user = await self.session.get(TelegramUser, user_id)
 
         if not user:
-            raise UserNotExists
+            raise UserNotExists(f"User with id {user_id} not exists in database")
 
         return dto.User.from_orm(user)
 
 
 class UserRepo(SQLAlchemyRepo, IUserRepo):
-    @exception_mapper
     async def _user(self, user_id: int) -> TelegramUser:
         user = await self.session.get(TelegramUser, user_id)
 
         if not user:
-            raise UserNotExists
+            raise UserNotExists(f"User with id {user_id} not exists in database")
 
         return user
 
-    @exception_mapper
     async def _populate_access_levels(self, user: TelegramUser) -> TelegramUser:
         access_levels = []
 
@@ -78,36 +73,39 @@ class UserRepo(SQLAlchemyRepo, IUserRepo):
         user.access_levels = access_levels
         return user
 
-    @exception_mapper
     async def add_user(self, user: TelegramUser) -> TelegramUser:
         try:
             await self._populate_access_levels(user)
             self.session.add(user)
             await self.session.flush()
-        except IntegrityError:
-            raise UserAlreadyExists
+        except IntegrityError as err:
+            raise UserAlreadyExists(
+                f"User with id {user.id} already exists in database"
+            ) from err
 
         return user
 
-    @exception_mapper
     async def user_by_id(self, user_id: int) -> TelegramUser:
         return await self._user(user_id)
 
-    @exception_mapper
     async def delete_user(self, user_id: int) -> None:
         try:
             user = await self._user(user_id)
             await self.session.delete(user)
             await self.session.flush()
-        except IntegrityError:
-            raise CantDeleteWithOrders
+        except IntegrityError as err:
+            raise CantDeleteWithOrders(
+                f"User with id {user_id} has orders, can't delete"
+            ) from err
 
-    @exception_mapper
     async def edit_user(self, user: TelegramUser) -> TelegramUser:
+        user_id = user.id  # copy user id to access in case of exception
         try:
             await self._populate_access_levels(user)
             await self.session.flush()
-        except IntegrityError:
-            raise UserAlreadyExists
+        except IntegrityError as err:
+            raise UserAlreadyExists(
+                f"User with id {user_id} already exists in database"
+            ) from err
 
         return user

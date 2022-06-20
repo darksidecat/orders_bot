@@ -76,7 +76,7 @@ class AddUser(UserUseCase):
             logger.info("User persisted: id=%s, %s", user.id, user)
 
         except UserAlreadyExists:
-            logger.error("User already exists: %s", user)
+            logger.info("User already exists: %s", user)
             await self.uow.rollback()
             raise
 
