@@ -10,6 +10,7 @@ from aiogram_dialog.widgets.managed import ManagedWidgetAdapter
 from aiogram_dialog.widgets.text import Const, Format
 
 from app.domain.market.dto.market import MarketCreate
+from app.domain.market.exceptions.market import MarketAlreadyExists
 from app.domain.market.usecases import MarketService
 from app.tgbot import states
 from app.tgbot.constants import MARKET_NAME, NO, YES_NO
@@ -51,7 +52,12 @@ async def add_market_yes_no(
 
     market = MarketCreate(name=data[MARKET_NAME])
 
-    market = await market_service.add_market(market)
+    try:
+        market = await market_service.add_market(market)
+    except MarketAlreadyExists as err:
+        await query.answer(str(err), show_alert=True)
+        await manager.dialog().back()
+        return
 
     result = fmt.pre(
         fmt.quote(f"Market created\n\n" f"id:   {market.id}\n" f"name: {market.name}\n")
