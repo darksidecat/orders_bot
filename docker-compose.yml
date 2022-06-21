@@ -22,8 +22,11 @@ services:
             VOLUMES_DIR: ${VOLUMES_DIR}
         volumes:
             - "~/${VOLUMES_DIR}/pg-data:/var/lib/postgresql/data"
+            - "~/${VOLUMES_DIR}/backups:/backups"
         ports:
             - "15432:5432"
+        healthcheck:
+            test: "exit 0"
     db_migration:
         build:
             context: .
@@ -32,6 +35,25 @@ services:
             - db
         env_file: .env
         command: ["/wait-for-it/wait-for-it.sh", "db:5432", "-t", "2", "--", "python", "-m", "alembic", "upgrade", "head"]
+    dbbackup:
+        image: prodrigestivill/postgres-backup-local:14-alpine
+        restart: always
+
+        volumes:
+            -   "~/${VOLUMES_DIR}/backups:/backups"
+        links:
+            -   db
+        depends_on:
+            db:
+                condition: service_healthy
+        environment:
+            - POSTGRES_HOST=db
+            - POSTGRES_DB=${DB__NAME}
+            - POSTGRES_USER=${DB__USER}
+            - POSTGRES_PASSWORD=${DB__PASSWORD}
+            - POSTGRES_EXTRA_OPTS=-Z6 --schema=public --blobs
+            - SCHEDULE=@daily
+            - HEALTHCHECK_PORT=8080
     bot:
         build:
             context: .
