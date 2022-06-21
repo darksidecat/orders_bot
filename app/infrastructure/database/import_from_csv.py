@@ -1,14 +1,13 @@
 import argparse
 import asyncio
 import csv
-
 from dataclasses import dataclass
 from typing import Optional
 from uuid import UUID
 
+from app.config import load_config
 from app.domain.goods.models.goods import Goods
 from app.domain.goods.models.goods_type import GoodsType
-from app.config import load_config
 from app.domain.market.models.market import Market
 from app.infrastructure.database.db import sa_sessionmaker
 from app.infrastructure.database.models import map_tables
@@ -16,8 +15,12 @@ from app.infrastructure.database.models import map_tables
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--markets', type=str, required=True, help='path to csv file with markets')
-    parser.add_argument('--goods', type=str, required=True, help='path to csv file with goods')
+    parser.add_argument(
+        "--markets", type=str, required=True, help="path to csv file with markets"
+    )
+    parser.add_argument(
+        "--goods", type=str, required=True, help="path to csv file with goods"
+    )
     args = parser.parse_args()
     return {"markets": args.markets, "goods": args.goods}
 
@@ -26,9 +29,10 @@ def parse_args():
 # csv format:
 # market_name
 
+
 def import_markets(path):
     # read file as csv
-    with open(path, 'r') as f:
+    with open(path, "r") as f:
         reader = csv.reader(f)
         # skip header
         next(reader)
@@ -36,6 +40,7 @@ def import_markets(path):
         for line in reader:
             market_name = line[0]
             yield market_name
+
 
 # import goods from csv file
 # csv format:
@@ -53,7 +58,7 @@ class Good:
 
 def import_goods(path):
     # read file as csv
-    with open(path, 'r') as f:
+    with open(path, "r") as f:
         reader = csv.reader(f)
         # skip header
         next(reader)
@@ -84,7 +89,7 @@ async def import_data_to_db(markets, goods):
                 type=good.type,
                 name=good.name,
                 sku=good.SKU,
-                parent=added_goods.get(good.parent_id)
+                parent=added_goods.get(good.parent_id),
             )
             added_goods[db_good.id] = db_good
             session.add(db_good)
@@ -98,4 +103,3 @@ if __name__ == "__main__":
     markets = import_markets(args["markets"])
     goods = import_goods(args["goods"])
     asyncio.run(import_data_to_db(markets, goods))
-
