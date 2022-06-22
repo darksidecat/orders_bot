@@ -50,4 +50,4 @@ def export_orders_to_csv(orders: list[Order]) -> bytes:
                 ]
             )
     # return bytes
-    return output.getvalue().encode("utf-8")
+    return output.getvalue().encode("utf-16")
