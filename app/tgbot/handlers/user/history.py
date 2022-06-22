@@ -240,7 +240,6 @@ history_dialog = Dialog(
         preview_add_transitions=[Next()],
     ),
     Window(
-        Const("Select an option"),
         Format("{result}"),
         Row(
             Button(Const("✅ Confirm"), id="confirm_order", on_click=confirm_order),

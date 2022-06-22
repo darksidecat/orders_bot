@@ -7,7 +7,7 @@ from app.tgbot.states import help_
 help_dialog = Dialog(
     Window(
         Format(
-            "<pre>📚 Help</pre>\n",
+            "<pre>📚 Help</pre>\n Coming soon...",
         ),
         Cancel(Const("❌ Close")),
         state=help_.Help.show,
