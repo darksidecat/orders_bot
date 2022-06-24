@@ -137,16 +137,22 @@ async def save_commentary(
     await dialog.next()
 
 
-order_adding_process = Multi(
-    Format(f"<pre>Goods:    {{{SELECTED_GOODS}.name}}</pre>", when=SELECTED_GOODS),
-    Format(f"<pre>Goods:    ...</pre>", when=when_not(SELECTED_GOODS)),
-    Format(f"<pre>Quantity: {{{'quantity'}}}</pre>", when="quantity"),
-    Format(f"<pre>Quantity: ...</pre>", when=when_not("quantity")),
-    Format(f"<pre>Market:   {{{SELECTED_MARKET}.name}}</pre>", when=SELECTED_MARKET),
-    Format(f"<pre>Market:   ...</pre>", when=when_not(SELECTED_MARKET)),
-    Format(f"<pre>Comments: {{{'commentary'}}}</pre>\n", when="commentary"),
-    Format(f"<pre>Comments: ...</pre>\n", when=when_not("commentary")),
-)
+def order_adding_process(only_filled=True):
+    buttons = Multi(
+        Format(f"<pre>Goods:    {{{SELECTED_GOODS}.name}}</pre>", when=SELECTED_GOODS),
+        Format(f"<pre>Goods:    ...</pre>", when=when_not(SELECTED_GOODS)),
+        Format(f"<pre>Quantity: {{{'quantity'}}}</pre>", when="quantity"),
+        Format(f"<pre>Quantity: ...</pre>", when=when_not("quantity")),
+        Format(f"<pre>Market:   {{{SELECTED_MARKET}.name}}</pre>", when=SELECTED_MARKET),
+        Format(f"<pre>Market:   ...</pre>", when=when_not(SELECTED_MARKET)),
+        Format(f"<pre>Comments: {{{'commentary'}}}</pre>", when="commentary"),
+        Format(f"<pre>Comments: ...</pre>", when=when_not("commentary")),
+    )
+
+    if only_filled:
+        buttons.texts = buttons.texts[::2]
+
+    return buttons
 
 
 async def order_adding_process_getter(
@@ -195,7 +201,8 @@ add_order_dialog = Dialog(
         preview_add_transitions=[Next()],
     ),
     Window(
-        order_adding_process,
+        order_adding_process(),
+        Const(" "),
         Const("Input quantity"),
         TextInput(
             id="item_qt",
@@ -212,7 +219,8 @@ add_order_dialog = Dialog(
         state=states.add_order.AddOrder.input_quantity,
     ),
     Window(
-        order_adding_process,
+        order_adding_process(),
+        Const(" "),
         Const("Select market:"),
         ScrollingGroup(
             Select(
@@ -235,7 +243,8 @@ add_order_dialog = Dialog(
         state=states.add_order.AddOrder.select_market,
     ),
     Window(
-        order_adding_process,
+        order_adding_process(),
+        Const(" "),
         Const("Input commentary"),
         MessageInput(save_commentary),
         Row(
@@ -247,7 +256,8 @@ add_order_dialog = Dialog(
         state=states.add_order.AddOrder.input_comment,
     ),
     Window(
-        order_adding_process,
+        order_adding_process(),
+        Const(" "),
         Const("Confirm"),
         Select(
             Format("{item[0]}"),
