@@ -90,7 +90,7 @@ Active: {"✅" if current_goods.is_active else "❌"}
         if current_goods
         else ""
     )
-    data = fmt.pre(data)
+    data = data
     goods_data = {"current_goods_data": data}
     if current_goods and current_goods.type == GoodsType.GOODS:
         goods_data["is_not_folder"] = True

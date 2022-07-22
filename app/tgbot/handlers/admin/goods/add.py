@@ -85,16 +85,14 @@ async def add_goods_yes_no(
 
     goods = await goods_service.add_goods(goods)
 
-    result = fmt.pre(
-        fmt.quote(
+    result = fmt.quote(
             f"Goods created\n\n"
-            f"id:           {goods.id}\n"
-            f"parent id:    {goods.parent_id}\n\n"
-            f"name:         {goods.name}\n"
-            f"type:         {'📁' if goods.type is GoodsType.FOLDER else '📦'}\n"
-            f"sku:          {goods.sku}\n"
+            f"id: {goods.id}\n"
+            f"parent id: {goods.parent_id}\n\n"
+            f"name: {goods.name}\n"
+            f"type: {'📁' if goods.type is GoodsType.FOLDER else '📦'}\n"
+            f"sku: {goods.sku}\n"
         )
-    )
     data["result"] = result
 
     await manager.dialog().next()

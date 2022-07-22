@@ -36,7 +36,7 @@ async def delete_user_yes_no(
         )
         await manager.dialog().back()
         return
-    data["result"] = fmt.pre(f"User {data[USER_ID]} deleted")
+    data["result"] = f"User {data[USER_ID]} deleted"
     await manager.dialog().next()
 
     await query.answer()
@@ -63,7 +63,7 @@ delete_user_dialog = Dialog(
         preview_add_transitions=[Next()],
     ),
     Window(
-        Format(fmt.pre("User:\n\nid:  {user.id}\nname:  {user.name}\n\nDelete?")),
+        Format("User:\n\nid: {user.id}\nname: {user.name}\n\nDelete?"),
         Select(
             Format("{item[0]}"),
             id="delete_yes_no",

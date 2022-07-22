@@ -38,12 +38,12 @@ async def get_user(dialog_manager: DialogManager, user_service: UserService, **k
 
 
 user_adding_process = Multi(
-    Format(f"<pre>User id:       {{{USER_ID}}}</pre>", when=USER_ID),
-    Format(f"<pre>User id:       ...</pre>", when=when_not(USER_ID)),
-    Format(f"<pre>User name:     {{{USER_NAME}}}</pre>", when=USER_NAME),
-    Format(f"<pre>User name:     ...</pre>", when=when_not(USER_NAME)),
-    Format(f"<pre>Access levels: {{{ACCESS_LEVELS}}}</pre>\n", when=ACCESS_LEVELS),
-    Format(f"<pre>Access levels: ...</pre>\n", when=when_not(ACCESS_LEVELS)),
+    Format(f"User id: {{{USER_ID}}}", when=USER_ID),
+    Format(f"User id: ...", when=when_not(USER_ID)),
+    Format(f"User name: {{{USER_NAME}}}", when=USER_NAME),
+    Format(f"User name: ...", when=when_not(USER_NAME)),
+    Format(f"Access levels: {{{ACCESS_LEVELS}}}\n", when=ACCESS_LEVELS),
+    Format(f"Access levels: ...\n", when=when_not(ACCESS_LEVELS)),
 )
 
 

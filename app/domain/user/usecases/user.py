@@ -64,7 +64,7 @@ class AddUser(UserUseCase):
             name=user.name,
             access_levels=id_to_access_levels(user.access_levels),
         )
-
+        id = user.id
         try:
             user = await self.uow.user.add_user(user=user)
 
@@ -76,8 +76,8 @@ class AddUser(UserUseCase):
             logger.info("User persisted: id=%s, %s", user.id, user)
 
         except UserAlreadyExists:
-            logger.info("User already exists: %s", user)
             await self.uow.rollback()
+            logger.info("User already exists: %s", id)
             raise
 
         return dto.User.from_orm(user)

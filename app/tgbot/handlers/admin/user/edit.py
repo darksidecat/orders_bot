@@ -210,14 +210,13 @@ async def save_edited_user(
 
     levels_names = ", ".join((level.name.name for level in new_user.access_levels))
 
-    result = fmt.pre(
-        fmt.quote(
+    result = fmt.quote(
             f"User {data[OLD_USER_ID]} edited\n\n"
-            f"id:           {new_user.id}\n"
-            f"name:         {new_user.name}\n"
+            f"id: {new_user.id}\n"
+            f"name: {new_user.name}\n"
             f"access level: {levels_names}\n"
         )
-    )
+
     data["result"] = result
 
     await dialog_manager.dialog().next()

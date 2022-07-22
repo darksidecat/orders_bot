@@ -5,12 +5,12 @@ from app.tgbot.constants import GOODS_NAME, GOODS_SKU, GOODS_TYPE
 from app.tgbot.handlers.dialogs.common import when_not
 
 goods_adding_process = Multi(
-    Format(f"<pre>Goods name:       {{{GOODS_NAME}}}</pre>", when=GOODS_NAME),
-    Format(f"<pre>Goods name:       ...</pre>", when=when_not(GOODS_NAME)),
-    Format(f"<pre>Goods type:       {{{GOODS_TYPE}}}</pre>", when=GOODS_TYPE),
-    Format(f"<pre>Goods type:       ...</pre>", when=when_not(GOODS_TYPE)),
-    Format(f"<pre>Goods SKU:        {{{GOODS_SKU}}}</pre>\n", when=GOODS_SKU),
-    Format(f"<pre>GOODS SKU:        ...</pre>\n", when=when_not(GOODS_SKU)),
+    Format(f"Goods name: {{{GOODS_NAME}}}", when=GOODS_NAME),
+    Format(f"Goods name: ...", when=when_not(GOODS_NAME)),
+    Format(f"Goods type: {{{GOODS_TYPE}}}", when=GOODS_TYPE),
+    Format(f"Goods type: ...", when=when_not(GOODS_TYPE)),
+    Format(f"Goods SKU: {{{GOODS_SKU}}}\n", when=GOODS_SKU),
+    Format(f"GOODS SKU: ...\n", when=when_not(GOODS_SKU)),
 )
 
 
