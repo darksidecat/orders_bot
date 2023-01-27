@@ -2,7 +2,7 @@ from typing import List
 from uuid import UUID
 
 from pydantic import parse_obj_as
-from sqlalchemy import func, insert, select
+from sqlalchemy import func, insert, select, desc
 from sqlalchemy.exc import IntegrityError
 
 from app.domain.goods.exceptions.goods import GoodsNotExists
@@ -37,7 +37,7 @@ class OrderReader(SQLAlchemyRepo, IOrderReader):
         query = (
             select(Order)
             .where(Order.creator.has(id=user_id))
-            .order_by(Order.created_at.desc())
+            .order_by(desc(Order.created_at))
             .limit(limit)
             .offset(offset)
         )
@@ -59,7 +59,7 @@ class OrderReader(SQLAlchemyRepo, IOrderReader):
         query = (
             select(Order)
             .where(Order.confirmed == ConfirmedStatus.NOT_PROCESSED)
-            .order_by(Order.created_at.desc())
+            .order_by(desc(Order.created_at))
             .limit(limit)
             .offset(offset)
         )
@@ -80,7 +80,7 @@ class OrderReader(SQLAlchemyRepo, IOrderReader):
         return count
 
     async def get_all_orders(self, limit: int, offset: int) -> List[dto.Order]:
-        query = select(Order).limit(limit).offset(offset)
+        query = select(Order).order_by(desc(Order.created_at)).limit(limit).offset(offset)
         result = await self.session.execute(query)
         orders = result.unique().scalars().fetchall()
 

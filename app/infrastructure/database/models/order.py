@@ -62,7 +62,7 @@ order_table = Table(
     ),
     Column(
         "creator_id",
-        INT,
+        BIGINT,
         ForeignKey("user.id", ondelete="RESTRICT", onupdate="CASCADE"),
         nullable=False,
     ),

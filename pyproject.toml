@@ -6,7 +6,7 @@ authors = ["darksidecat <bitalik371@gmail.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.10"
-aiogram = {version = "^3.0.0b3", allow-prereleases = true}
+aiogram = {version = "=3.0.0b3", allow-prereleases = true}
 aiogram_dialog = {git = "https://github.com/darksidecat/aiogram_dialog.git", branch = "aiogram3-quick-fixes"}
 SQLAlchemy = "^1.4.36"
 aioredis = "^2.0.1"
