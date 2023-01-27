@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime
-from typing import List
+from typing import List, Optional
 from uuid import UUID
 
 import attrs
@@ -40,6 +40,9 @@ class Order(Aggregate):
     created_at: datetime = attrs.field(
         validator=validators.instance_of(datetime), factory=datetime.now
     )
+    confirmed_at: Optional[datetime] = attrs.field(
+        validator=validators.instance_of(Optional[datetime]), default=None
+    )
     recipient_market: Market = attrs.field(validator=validators.instance_of(Market))
     commentary: str = attrs.field(validator=validators.instance_of(str))
     confirmed: ConfirmedStatus = attrs.field(
@@ -58,6 +61,7 @@ class Order(Aggregate):
         if self.confirmed is not ConfirmedStatus.NOT_PROCESSED:
             raise OrderAlreadyConfirmed()
         self.confirmed = status
+        self.confirmed_at = datetime.now()
         self.events.append(
             OrderConfirmStatusChanged(dto.order.Order.from_orm(self), confirmed_by)
         )
