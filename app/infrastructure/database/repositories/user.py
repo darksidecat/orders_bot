@@ -75,12 +75,13 @@ class UserRepo(SQLAlchemyRepo, IUserRepo):
 
     async def add_user(self, user: TelegramUser) -> TelegramUser:
         try:
+            id = user.id
             await self._populate_access_levels(user)
             self.session.add(user)
             await self.session.flush()
         except IntegrityError as err:
             raise UserAlreadyExists(
-                f"User with id {user.id} already exists in database"
+                f"User with id {id} already exists in database"
             ) from err
 
         return user

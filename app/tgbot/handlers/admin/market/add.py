@@ -59,9 +59,7 @@ async def add_market_yes_no(
         await manager.dialog().back()
         return
 
-    result = fmt.pre(
-        fmt.quote(f"Market created\n\n" f"id:   {market.id}\n" f"name: {market.name}\n")
-    )
+    result = fmt.quote(f"Market created\n\n" f"id: {market.id}\n" f"name: {market.name}\n")
     data["result"] = result
 
     await manager.dialog().next()

@@ -24,7 +24,7 @@ from app.domain.goods.exceptions.goods import (
     CantDeleteWithChildren,
     CantMakeActiveWithInactiveParent,
     CantMakeInactiveWithActiveChildren,
-    GoodsNotExists,
+    GoodsNotExists, CantDeleteWithOrders,
 )
 from app.domain.goods.models.goods_type import GoodsType
 from app.domain.goods.usecases.goods import GoodsService
@@ -90,7 +90,7 @@ Active: {"✅" if current_goods.is_active else "❌"}
         if current_goods
         else ""
     )
-    data = fmt.pre(data)
+    data = data
     goods_data = {"current_goods_data": data}
     if current_goods and current_goods.type == GoodsType.GOODS:
         goods_data["is_not_folder"] = True
@@ -155,6 +155,9 @@ async def delete_goods(
         await goods_service.delete_goods(UUID(parent_id))
     except CantDeleteWithChildren:
         await query.answer("Can't delete with children")
+        return
+    except CantDeleteWithOrders:
+        await query.answer("Can't delete goods with orders")
         return
 
     await query.answer("Goods deleted")

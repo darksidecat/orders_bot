@@ -139,14 +139,14 @@ async def save_commentary(
 
 def order_adding_process(only_filled=True):
     buttons = Multi(
-        Format(f"<pre>Goods:    {{{SELECTED_GOODS}.name}}</pre>", when=SELECTED_GOODS),
-        Format(f"<pre>Goods:    ...</pre>", when=when_not(SELECTED_GOODS)),
-        Format(f"<pre>Quantity: {{{'quantity'}}}</pre>", when="quantity"),
-        Format(f"<pre>Quantity: ...</pre>", when=when_not("quantity")),
-        Format(f"<pre>Market:   {{{SELECTED_MARKET}.name}}</pre>", when=SELECTED_MARKET),
-        Format(f"<pre>Market:   ...</pre>", when=when_not(SELECTED_MARKET)),
-        Format(f"<pre>Comments: {{{'commentary'}}}</pre>", when="commentary"),
-        Format(f"<pre>Comments: ...</pre>", when=when_not("commentary")),
+        Format(f"Goods: {{{SELECTED_GOODS}.name}}", when=SELECTED_GOODS),
+        Format(f"Goods: ...", when=when_not(SELECTED_GOODS)),
+        Format(f"Quantity: {{{'quantity'}}}", when="quantity"),
+        Format(f"Quantity: ...", when=when_not("quantity")),
+        Format(f"Market: {{{SELECTED_MARKET}.name}}", when=SELECTED_MARKET),
+        Format(f"Market: ...", when=when_not(SELECTED_MARKET)),
+        Format(f"Comments: {{{'commentary'}}}", when="commentary"),
+        Format(f"Comments: ...", when=when_not("commentary")),
     )
 
     if only_filled:

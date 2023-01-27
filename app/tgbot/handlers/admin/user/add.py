@@ -87,10 +87,10 @@ async def add_user_yes_no(
         new_user = await user_service.add_user(user)
         levels_names = ", ".join((level.name.name for level in new_user.access_levels))
 
-        result = fmt.pre(
+        result = (
             f"User created\n"
-            f"id:           {data[USER_ID]}\n"
-            f"name:         {fmt.quote(data[USER_NAME])}\n"
+            f"id: {data[USER_ID]}\n"
+            f"name: {fmt.quote(data[USER_NAME])}\n"
             f"access level: {levels_names}\n"
         )
         data["result"] = result
