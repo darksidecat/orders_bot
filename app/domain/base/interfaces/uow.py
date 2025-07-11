@@ -1,4 +1,4 @@
-from asyncio import Protocol
+from typing import Protocol
 
 
 class IUoW(Protocol):
